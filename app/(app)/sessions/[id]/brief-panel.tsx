@@ -1,7 +1,5 @@
 "use client";
 
-// CR-002: Brief panel — live brief state display, refreshes after each turn.
-
 import { useState } from "react";
 import type { BriefState } from "@/lib/types/entities";
 
@@ -70,7 +68,7 @@ export function BriefPanel({ sessionId, briefState }: Props) {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      // Silent — export is non-critical; user can retry.
+      // Silent — export is non-critical.
     } finally {
       setExporting(false);
     }
@@ -80,177 +78,384 @@ export function BriefPanel({ sessionId, briefState }: Props) {
     <>
       {/* Header */}
       <div
-        className="flex-none px-5 py-4 border-b"
-        style={{ borderColor: "var(--color-border)" }}
+        style={{
+          padding: "20px 20px 16px",
+          borderBottom: "1px solid var(--border-subtle)",
+          flexShrink: 0,
+        }}
       >
-        <div className="flex items-center justify-between mb-2">
-          <h2
-            className="text-[18px] font-semibold"
-            style={{ color: "var(--color-text-primary)" }}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: "12px",
+          }}
+        >
+          <p
+            style={{
+              fontSize: "10px",
+              fontWeight: 600,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: "var(--text-muted)",
+            }}
           >
-            Brief
-          </h2>
-          <span className="text-[13px]" style={{ color: "var(--color-text-muted)" }}>
+            Brief Progress
+          </p>
+          <span
+            style={{
+              fontSize: "11px",
+              color: completionPct > 0 ? "var(--accent-primary)" : "var(--text-muted)",
+              fontWeight: 600,
+              letterSpacing: "0.04em",
+              fontVariantNumeric: "tabular-nums",
+            }}
+          >
             {completionPct}%
           </span>
         </div>
+
+        {/* Progress bar — thin, elegant */}
         <div
-          className="h-1 rounded-full overflow-hidden"
-          style={{ backgroundColor: "var(--color-surface-secondary)" }}
+          style={{
+            height: "2px",
+            background: "var(--border-subtle)",
+            borderRadius: "1px",
+            overflow: "hidden",
+          }}
         >
           <div
-            className="h-full rounded-full transition-all duration-500"
             style={{
+              height: "100%",
               width: `${completionPct}%`,
-              backgroundColor: "var(--color-accent)",
+              background: completionPct === 100
+                ? "linear-gradient(90deg, var(--accent-primary), var(--accent-hover))"
+                : "var(--accent-primary)",
+              borderRadius: "1px",
+              transition: "width 600ms cubic-bezier(0.16, 1, 0.3, 1)",
+              boxShadow: completionPct > 0 ? "0 0 8px rgba(212,175,55,0.4)" : "none",
             }}
           />
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4">
-        {SECTIONS.map(({ label, key }) => {
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "16px 20px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "0",
+        }}
+      >
+        {SECTIONS.map(({ label, key }, index) => {
           const value = briefState?.[key] as string | null | undefined;
           const conf = confidence?.[key as string] ?? 0;
+          const isLast = index === SECTIONS.length - 1 && deliverables.length === 0 && constraints.length === 0 && openQuestions.length === 0;
 
           return (
-            <div key={key as string}>
-              <div className="flex items-center justify-between mb-1">
-                <span
-                  className="text-[13px] font-semibold"
-                  style={{ color: "var(--color-text-secondary)" }}
-                >
-                  {label}
-                </span>
-                {conf > 0 && (
-                  <span className="text-[12px]" style={{ color: "var(--color-text-muted)" }}>
-                    {Math.round(conf * 100)}%
-                  </span>
-                )}
-              </div>
-              {conf > 0 && (
-                <div
-                  className="h-0.5 rounded-full mb-2 overflow-hidden"
-                  style={{ backgroundColor: "var(--color-surface-secondary)" }}
-                >
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${conf * 100}%`,
-                      backgroundColor: "var(--color-accent)",
-                    }}
-                  />
-                </div>
-              )}
-              <p
-                className="text-[13px] leading-relaxed"
-                style={{
-                  color: value ? "var(--color-text-primary)" : "var(--color-text-muted)",
-                }}
-              >
-                {value ?? "Not yet defined"}
-              </p>
-            </div>
+            <BriefSection
+              key={key as string}
+              label={label}
+              value={value}
+              confidence={conf}
+              isLast={isLast}
+            />
           );
         })}
 
         {deliverables.length > 0 && (
-          <div>
-            <span
-              className="text-[13px] font-semibold block mb-1"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
-              Deliverables
-            </span>
-            <ul className="flex flex-col gap-1">
-              {deliverables.map((d, i) => (
-                <li key={i} className="text-[13px]" style={{ color: "var(--color-text-primary)" }}>
-                  · {d}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ListSection
+            label="Deliverables"
+            items={deliverables}
+            isLast={constraints.length === 0 && openQuestions.length === 0}
+          />
         )}
 
         {constraints.length > 0 && (
-          <div>
-            <span
-              className="text-[13px] font-semibold block mb-1"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
-              Constraints
-            </span>
-            <ul className="flex flex-col gap-1">
-              {constraints.map((c, i) => (
-                <li key={i} className="text-[13px]" style={{ color: "var(--color-text-primary)" }}>
-                  · {c}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ListSection
+            label="Constraints"
+            items={constraints}
+            isLast={openQuestions.length === 0}
+          />
         )}
 
         {openQuestions.length > 0 && (
-          <div>
-            <span
-              className="text-[13px] font-semibold block mb-1"
-              style={{ color: "var(--color-warning, #b45309)" }}
-            >
-              Open questions
-            </span>
-            <ul className="flex flex-col gap-1">
-              {openQuestions.map((q, i) => (
-                <li key={i} className="text-[13px]" style={{ color: "var(--color-text-secondary)" }}>
-                  · {q}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ListSection
+            label="Open questions"
+            items={openQuestions}
+            isLast
+            accent="warning"
+          />
         )}
 
         {!briefState && (
-          <p className="text-[13px]" style={{ color: "var(--color-text-muted)" }}>
-            Brief state will appear here as the conversation progresses.
-          </p>
+          <div
+            style={{
+              padding: "24px 0",
+              textAlign: "center",
+            }}
+          >
+            <p
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: "14px",
+                color: "var(--text-muted)",
+                lineHeight: 1.6,
+                fontStyle: "italic",
+              }}
+            >
+              The brief will take shape as your conversation unfolds.
+            </p>
+          </div>
         )}
       </div>
 
       {/* Footer */}
       <div
-        className="flex-none px-4 py-4 border-t"
-        style={{ borderColor: "var(--color-border)" }}
+        style={{
+          padding: "14px 16px",
+          borderTop: "1px solid var(--border-subtle)",
+          flexShrink: 0,
+          display: "flex",
+          gap: "8px",
+        }}
       >
-        <div className="flex gap-2">
-          <button
-            onClick={handleShare}
-            disabled={!canExport || sharing}
-            className="flex-1 h-11 rounded-full text-[14px] font-semibold transition-opacity"
-            style={{
-              border: "1px solid var(--color-accent)",
-              backgroundColor: "transparent",
-              color: "var(--color-accent)",
-              opacity: !canExport || sharing ? 0.4 : 1,
-              cursor: !canExport || sharing ? "default" : "pointer",
-            }}
-          >
-            {copied ? "Copied!" : sharing ? "Sharing…" : "Share"}
-          </button>
-          <button
-            onClick={handleExport}
-            disabled={!canExport || exporting}
-            className="flex-1 h-11 rounded-full text-[14px] font-semibold transition-opacity"
-            style={{
-              backgroundColor: "var(--color-accent)",
-              color: "var(--color-text-inverted)",
-              opacity: !canExport || exporting ? 0.4 : 1,
-              cursor: !canExport || exporting ? "default" : "pointer",
-            }}
-          >
-            {exporting ? "Exporting…" : "Export"}
-          </button>
-        </div>
+        <OutlineButton
+          onClick={handleShare}
+          disabled={!canExport || sharing}
+        >
+          {copied ? "Copied!" : sharing ? "Sharing…" : "Share"}
+        </OutlineButton>
+        <PrimaryButton
+          onClick={handleExport}
+          disabled={!canExport || exporting}
+        >
+          {exporting ? "Exporting…" : "Export"}
+        </PrimaryButton>
       </div>
     </>
+  );
+}
+
+function BriefSection({
+  label,
+  value,
+  confidence,
+  isLast,
+}: {
+  label: string;
+  value?: string | null;
+  confidence: number;
+  isLast?: boolean;
+}) {
+  return (
+    <div
+      style={{
+        paddingTop: "14px",
+        paddingBottom: "14px",
+        borderBottom: isLast ? "none" : "1px solid var(--border-subtle)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: "6px",
+        }}
+      >
+        <p
+          style={{
+            fontSize: "10px",
+            fontWeight: 600,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            color: value ? "var(--text-muted)" : "rgba(122,122,120,0.5)",
+          }}
+        >
+          {label}
+        </p>
+        {confidence > 0 && (
+          <span
+            style={{
+              fontSize: "10px",
+              color: "var(--accent-primary)",
+              fontWeight: 600,
+              letterSpacing: "0.04em",
+              opacity: 0.8,
+            }}
+          >
+            {Math.round(confidence * 100)}%
+          </span>
+        )}
+      </div>
+
+      {confidence > 0 && (
+        <div
+          style={{
+            height: "1px",
+            background: "var(--border-subtle)",
+            borderRadius: "0.5px",
+            marginBottom: "8px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              height: "100%",
+              width: `${confidence * 100}%`,
+              background: "var(--accent-primary)",
+              borderRadius: "0.5px",
+              transition: "width 600ms cubic-bezier(0.16, 1, 0.3, 1)",
+              opacity: 0.7,
+            }}
+          />
+        </div>
+      )}
+
+      <p
+        style={{
+          fontSize: "13px",
+          lineHeight: 1.7,
+          color: value ? "var(--text-secondary)" : "rgba(122,122,120,0.45)",
+          fontStyle: value ? "normal" : "italic",
+        }}
+      >
+        {value ?? "Not yet defined"}
+      </p>
+    </div>
+  );
+}
+
+function ListSection({
+  label,
+  items,
+  isLast,
+  accent,
+}: {
+  label: string;
+  items: string[];
+  isLast?: boolean;
+  accent?: "warning";
+}) {
+  return (
+    <div
+      style={{
+        paddingTop: "14px",
+        paddingBottom: "14px",
+        borderBottom: isLast ? "none" : "1px solid var(--border-subtle)",
+      }}
+    >
+      <p
+        style={{
+          fontSize: "10px",
+          fontWeight: 600,
+          letterSpacing: "0.12em",
+          textTransform: "uppercase",
+          color: accent === "warning" ? "rgba(183,121,31,0.9)" : "var(--text-muted)",
+          marginBottom: "8px",
+        }}
+      >
+        {label}
+      </p>
+      <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "5px" }}>
+        {items.map((item, i) => (
+          <li
+            key={i}
+            style={{
+              fontSize: "13px",
+              lineHeight: 1.7,
+              color: "var(--text-secondary)",
+              display: "flex",
+              gap: "8px",
+            }}
+          >
+            <span style={{ color: "var(--border-strong)", flexShrink: 0 }}>—</span>
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function PrimaryButton({
+  children,
+  onClick,
+  disabled,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        flex: 1,
+        height: "40px",
+        borderRadius: "999px",
+        border: "none",
+        fontSize: "13px",
+        fontWeight: 600,
+        cursor: disabled ? "default" : "pointer",
+        background: disabled
+          ? "rgba(212,175,55,0.2)"
+          : hovered
+          ? "var(--accent-hover)"
+          : "var(--accent-primary)",
+        color: disabled ? "var(--text-muted)" : "#111111",
+        opacity: disabled ? 0.5 : 1,
+        transition: "background 180ms ease, box-shadow 180ms ease",
+        boxShadow: !disabled && hovered ? "0 0 16px rgba(212,175,55,0.28)" : "none",
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+function OutlineButton({
+  children,
+  onClick,
+  disabled,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        flex: 1,
+        height: "40px",
+        borderRadius: "999px",
+        border: `1px solid ${hovered && !disabled ? "var(--accent-primary)" : "var(--border-strong)"}`,
+        fontSize: "13px",
+        fontWeight: 600,
+        cursor: disabled ? "default" : "pointer",
+        background: hovered && !disabled ? "var(--accent-soft)" : "transparent",
+        color: disabled ? "var(--text-muted)" : hovered ? "var(--accent-primary)" : "var(--text-secondary)",
+        opacity: disabled ? 0.4 : 1,
+        transition: "border-color 180ms ease, color 180ms ease, background 180ms ease",
+      }}
+    >
+      {children}
+    </button>
   );
 }

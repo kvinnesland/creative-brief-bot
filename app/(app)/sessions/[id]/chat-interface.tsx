@@ -1,8 +1,5 @@
 "use client";
 
-// CR-002: Chat interface — useChat hook (AI SDK v6), message thread, textarea.
-// In v6, api/body are configured via DefaultChatTransport on the transport option.
-
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useState, useRef, useEffect, useMemo } from "react";
@@ -23,22 +20,17 @@ interface Props {
 export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, initialMessages }: Props) {
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const transport = useMemo(
-    () =>
-      new DefaultChatTransport({
-        api: "/api/chat",
-        body: { sessionId },
-      }),
+    () => new DefaultChatTransport({ api: "/api/chat", body: { sessionId } }),
     [sessionId]
   );
 
   const { messages, status, sendMessage } = useChat({
     transport,
     messages: initialMessages,
-    onFinish: () => {
-      onBriefStateUpdate();
-    },
+    onFinish: () => { onBriefStateUpdate(); },
   });
 
   const isStreaming = status === "streaming" || status === "submitted";
@@ -51,6 +43,13 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
     if (!input.trim() || isStreaming) return;
     sendMessage({ text: input });
     setInput("");
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
+  }
+
+  function handleTextareaChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    setInput(e.target.value);
+    e.target.style.height = "auto";
+    e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
   }
 
   const isEmpty = messages.length === 0;
@@ -59,30 +58,91 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
     <>
       {/* Header */}
       <div
-        className="flex-none px-5 py-4 border-b"
-        style={{ borderColor: "var(--color-border)" }}
+        style={{
+          padding: "20px 24px 16px",
+          borderBottom: "1px solid var(--border-subtle)",
+          flexShrink: 0,
+        }}
       >
         <h1
-          className="text-[18px] font-semibold"
-          style={{ color: "var(--color-text-primary)" }}
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontSize: "20px",
+            fontWeight: 500,
+            letterSpacing: "-0.02em",
+            color: "var(--text-primary)",
+            lineHeight: 1.2,
+          }}
         >
           {initialTitle ?? "New Brief"}
         </h1>
-        <p className="text-[13px] mt-0.5" style={{ color: "var(--color-text-muted)" }}>
+        <p
+          style={{
+            fontSize: "12px",
+            marginTop: "4px",
+            color: isStreaming ? "var(--accent-primary)" : "var(--text-muted)",
+            letterSpacing: "0.01em",
+            transition: "color 300ms ease",
+          }}
+        >
           {isStreaming ? "Thinking…" : "In progress"}
         </p>
       </div>
 
       {/* Message thread */}
-      <div className="flex-1 overflow-y-auto px-5 py-6 flex flex-col gap-4">
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "24px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "16px",
+        }}
+      >
         {isEmpty ? (
-          <div className="flex-1 flex items-center justify-center">
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              padding: "40px 0",
+            }}
+          >
+            <div
+              style={{
+                width: "40px",
+                height: "1px",
+                background: "linear-gradient(90deg, transparent, var(--border-strong), transparent)",
+                marginBottom: "24px",
+              }}
+            />
             <p
-              className="text-[15px] text-center max-w-sm"
-              style={{ color: "var(--color-text-muted)" }}
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: "18px",
+                fontWeight: 400,
+                color: "var(--text-secondary)",
+                maxWidth: "280px",
+                lineHeight: 1.6,
+                letterSpacing: "-0.01em",
+              }}
             >
-              Describe your project to get started. The AI will ask follow-up
-              questions and build your brief in real time.
+              Describe your project to begin.
+            </p>
+            <p
+              style={{
+                fontSize: "13px",
+                color: "var(--text-muted)",
+                maxWidth: "260px",
+                lineHeight: 1.6,
+                marginTop: "10px",
+              }}
+            >
+              The brief will build itself as the conversation unfolds.
             </p>
           </div>
         ) : (
@@ -93,29 +153,7 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
               .join("") ?? "";
 
             return (
-              <div
-                key={m.id}
-                className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className="max-w-[80%] rounded-2xl px-4 py-3 text-[14px] leading-relaxed"
-                  style={
-                    m.role === "user"
-                      ? {
-                          backgroundColor: "var(--color-accent)",
-                          color: "var(--color-text-inverted)",
-                          borderBottomRightRadius: "6px",
-                        }
-                      : {
-                          backgroundColor: "var(--color-surface-secondary)",
-                          color: "var(--color-text-primary)",
-                          borderBottomLeftRadius: "6px",
-                        }
-                  }
-                >
-                  <span style={{ whiteSpace: "pre-wrap" }}>{text}</span>
-                </div>
-              </div>
+              <MessageBubble key={m.id} role={m.role} text={text} />
             );
           })
         )}
@@ -124,19 +162,30 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
 
       {/* Input area */}
       <div
-        className="flex-none px-4 py-4 border-t"
-        style={{ borderColor: "var(--color-border)" }}
+        style={{
+          padding: "16px 20px 20px",
+          borderTop: "1px solid var(--border-subtle)",
+          flexShrink: 0,
+        }}
       >
         <div
-          className="flex items-end gap-3 rounded-xl px-4 py-3"
           style={{
-            border: "1px solid var(--color-border)",
-            backgroundColor: "var(--color-surface-secondary)",
+            display: "flex",
+            alignItems: "flex-end",
+            gap: "12px",
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid var(--border-subtle)",
+            borderRadius: "16px",
+            padding: "12px 14px",
+            transition: "border-color 180ms ease",
           }}
+          onFocusCapture={(e) => ((e.currentTarget as HTMLDivElement).style.borderColor = "var(--border-strong)")}
+          onBlurCapture={(e) => ((e.currentTarget as HTMLDivElement).style.borderColor = "var(--border-subtle)")}
         >
           <textarea
+            ref={textareaRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleTextareaChange}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -146,26 +195,142 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
             placeholder="Describe your project…"
             rows={1}
             disabled={isStreaming}
-            className="flex-1 resize-none bg-transparent text-[15px] outline-none"
             style={{
-              color: "var(--color-text-primary)",
+              flex: 1,
+              resize: "none",
+              background: "transparent",
+              fontSize: "14px",
+              outline: "none",
+              border: "none",
+              color: "var(--text-primary)",
+              lineHeight: 1.6,
               maxHeight: "120px",
+              overflow: "auto",
+              fontFamily: "var(--font-sans)",
             }}
           />
-          <button
-            onClick={submit}
-            disabled={!input.trim() || isStreaming}
-            className="h-9 rounded-full px-4 text-[14px] font-semibold flex-none transition-opacity"
-            style={{
-              backgroundColor: "var(--color-accent)",
-              color: "var(--color-text-inverted)",
-              opacity: !input.trim() || isStreaming ? 0.4 : 1,
-            }}
-          >
-            Send
-          </button>
+          <SendButton onClick={submit} disabled={!input.trim() || isStreaming} />
         </div>
+        <p
+          style={{
+            fontSize: "11px",
+            color: "var(--text-muted)",
+            textAlign: "center",
+            marginTop: "10px",
+            letterSpacing: "0.02em",
+          }}
+        >
+          Enter to send · Shift+Enter for new line
+        </p>
       </div>
     </>
+  );
+}
+
+function MessageBubble({ role, text }: { role: "user" | "assistant"; text: string }) {
+  const isUser = role === "user";
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: isUser ? "flex-end" : "flex-start",
+        alignItems: "flex-end",
+        gap: "10px",
+      }}
+    >
+      {!isUser && (
+        <div
+          style={{
+            width: "24px",
+            height: "24px",
+            borderRadius: "6px",
+            background: "var(--accent-soft)",
+            border: "1px solid rgba(212,175,55,0.2)",
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              width: "6px",
+              height: "6px",
+              borderRadius: "50%",
+              background: "var(--accent-primary)",
+            }}
+          />
+        </div>
+      )}
+
+      <div
+        style={{
+          maxWidth: "78%",
+          borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+          padding: "12px 16px",
+          fontSize: "14px",
+          lineHeight: 1.7,
+          ...(isUser
+            ? {
+                background: "linear-gradient(180deg, rgba(212,175,55,0.22) 0%, rgba(212,175,55,0.14) 100%)",
+                border: "1px solid rgba(212,175,55,0.2)",
+                color: "var(--text-primary)",
+              }
+            : {
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.07)",
+                backdropFilter: "blur(12px)",
+                color: "var(--text-secondary)",
+              }),
+        }}
+      >
+        <span style={{ whiteSpace: "pre-wrap" }}>{text}</span>
+      </div>
+    </div>
+  );
+}
+
+function SendButton({ onClick, disabled }: { onClick: () => void; disabled: boolean }) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        width: "34px",
+        height: "34px",
+        borderRadius: "10px",
+        border: "none",
+        flexShrink: 0,
+        cursor: disabled ? "default" : "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: disabled
+          ? "rgba(255,255,255,0.05)"
+          : hovered
+          ? "var(--accent-hover)"
+          : "var(--accent-primary)",
+        transition: "background 180ms ease, box-shadow 180ms ease",
+        boxShadow: !disabled && hovered ? "0 0 16px rgba(212,175,55,0.3)" : "none",
+      }}
+    >
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 14 14"
+        fill="none"
+        stroke={disabled ? "var(--text-muted)" : "#111111"}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M2 7h10M7 2l5 5-5 5" />
+      </svg>
+    </button>
   );
 }

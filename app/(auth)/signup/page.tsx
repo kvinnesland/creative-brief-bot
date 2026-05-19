@@ -14,7 +14,6 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Client created inside handler so it is never called during SSR pre-rendering.
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -32,90 +31,197 @@ export default function SignupPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ backgroundColor: "var(--color-bg-app)" }}
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "var(--bg-primary)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "24px",
+      }}
     >
-      <div
-        className="w-full max-w-[420px] rounded-3xl p-8"
-        style={{
-          backgroundColor: "var(--color-surface-primary)",
-          border: "1px solid var(--color-border)",
-        }}
-      >
-        <div className="mb-8">
-          <h1
-            className="text-[28px] font-[650] leading-9 tracking-tight"
-            style={{ color: "var(--color-text-primary)" }}
+      <div style={{ width: "100%", maxWidth: "400px" }}>
+        {/* Wordmark */}
+        <div style={{ marginBottom: "48px", textAlign: "center" }}>
+          <p
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: "13px",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "var(--accent-primary)",
+              marginBottom: "20px",
+              fontWeight: 500,
+            }}
           >
             Creative Brief
+          </p>
+          <h1
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: "34px",
+              fontWeight: 500,
+              lineHeight: 1.15,
+              letterSpacing: "-0.02em",
+              color: "var(--text-primary)",
+            }}
+          >
+            Begin here.
           </h1>
-          <p className="mt-1 text-[15px]" style={{ color: "var(--color-text-secondary)" }}>
-            Create your account
+          <p
+            style={{
+              marginTop: "10px",
+              fontSize: "14px",
+              color: "var(--text-muted)",
+              lineHeight: 1.6,
+            }}
+          >
+            Create your account to get started.
           </p>
         </div>
 
-        <form onSubmit={handleSignup} className="flex flex-col gap-3">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="h-11 rounded-xl px-4 text-[15px] outline-none transition-colors"
-            style={{
-              border: `1px solid ${error ? "var(--color-error)" : "var(--color-border)"}`,
-              backgroundColor: "var(--color-surface-primary)",
-              color: "var(--color-text-primary)",
-            }}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-            className="h-11 rounded-xl px-4 text-[15px] outline-none transition-colors"
-            style={{
-              border: `1px solid ${error ? "var(--color-error)" : "var(--color-border)"}`,
-              backgroundColor: "var(--color-surface-primary)",
-              color: "var(--color-text-primary)",
-            }}
-          />
-
-          {error && (
-            <p className="text-[13px]" style={{ color: "var(--color-error)" }}>
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-1 h-11 rounded-full text-[14px] font-semibold transition-colors disabled:opacity-50"
-            style={{
-              backgroundColor: "var(--color-accent)",
-              color: "var(--color-text-inverted)",
-            }}
-          >
-            {loading ? "Creating account…" : "Create account"}
-          </button>
-        </form>
-
-        <p
-          className="mt-6 text-center text-[13px]"
-          style={{ color: "var(--color-text-muted)" }}
+        {/* Card */}
+        <div
+          style={{
+            background: "var(--surface-primary)",
+            border: "1px solid var(--border-subtle)",
+            borderRadius: "20px",
+            padding: "32px",
+          }}
         >
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            className="underline underline-offset-2"
-            style={{ color: "var(--color-text-secondary)" }}
-          >
-            Sign in
-          </Link>
-        </p>
+          <form onSubmit={handleSignup} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <AuthInput
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              hasError={!!error}
+              required
+            />
+            <AuthInput
+              type="password"
+              placeholder="Password (8+ characters)"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              hasError={!!error}
+              required
+              minLength={8}
+            />
+
+            {error && (
+              <p style={{ fontSize: "13px", color: "var(--color-error)", marginTop: "2px" }}>
+                {error}
+              </p>
+            )}
+
+            <PrimaryButton type="submit" disabled={loading} style={{ marginTop: "4px" }}>
+              {loading ? "Creating account…" : "Create account"}
+            </PrimaryButton>
+          </form>
+
+          <div
+            style={{
+              borderTop: "1px solid var(--border-subtle)",
+              margin: "24px 0",
+            }}
+          />
+
+          <p style={{ fontSize: "13px", color: "var(--text-muted)", textAlign: "center" }}>
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              style={{ color: "var(--accent-primary)", textDecoration: "none", fontWeight: 500 }}
+            >
+              Sign in
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
+  );
+}
+
+function AuthInput({
+  type,
+  placeholder,
+  value,
+  onChange,
+  hasError,
+  required,
+  minLength,
+}: {
+  type: string;
+  placeholder: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  hasError?: boolean;
+  required?: boolean;
+  minLength?: number;
+}) {
+  const [focused, setFocused] = useState(false);
+
+  return (
+    <input
+      type={type}
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      required={required}
+      minLength={minLength}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      style={{
+        height: "46px",
+        borderRadius: "12px",
+        padding: "0 16px",
+        fontSize: "14px",
+        outline: "none",
+        width: "100%",
+        transition: "border-color 180ms ease, box-shadow 180ms ease",
+        background: "rgba(255,255,255,0.03)",
+        color: "var(--text-primary)",
+        border: `1px solid ${hasError ? "var(--color-error)" : focused ? "var(--accent-primary)" : "var(--border-subtle)"}`,
+        boxShadow: focused && !hasError ? "0 0 0 3px rgba(212,175,55,0.12)" : "none",
+      }}
+    />
+  );
+}
+
+function PrimaryButton({
+  children,
+  type,
+  disabled,
+  style,
+}: {
+  children: React.ReactNode;
+  type?: "submit" | "button";
+  disabled?: boolean;
+  style?: React.CSSProperties;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <button
+      type={type}
+      disabled={disabled}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        height: "46px",
+        borderRadius: "999px",
+        background: hovered && !disabled ? "var(--accent-hover)" : "var(--accent-primary)",
+        color: "#111111",
+        border: "none",
+        fontSize: "14px",
+        fontWeight: 600,
+        cursor: disabled ? "default" : "pointer",
+        opacity: disabled ? 0.5 : 1,
+        transition: "background 180ms ease, box-shadow 180ms ease",
+        boxShadow: hovered && !disabled ? "0 0 24px rgba(212,175,55,0.3)" : "none",
+        ...style,
+      }}
+    >
+      {children}
+    </button>
   );
 }

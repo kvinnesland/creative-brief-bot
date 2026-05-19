@@ -1,8 +1,5 @@
 "use client";
 
-// CR-002: SessionShell — client wrapper holding live briefState in React state.
-// Receives initial data from the server component, refreshes after each chat turn.
-
 import { useState, useCallback } from "react";
 import { ChatInterface } from "./chat-interface";
 import { BriefPanel } from "./brief-panel";
@@ -37,7 +34,7 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
         if (s.title) setTitle(s.title);
       }
     } catch {
-      // Silently ignore — stale state is acceptable; UI stays consistent.
+      // Stale state is acceptable — UI stays consistent.
     }
   }, [session.id]);
 
@@ -45,56 +42,126 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "260px minmax(0, 1fr) 380px",
-        gap: "16px",
-        padding: "16px",
+        gridTemplateColumns: "300px minmax(0, 1fr) 420px",
+        gap: "20px",
+        padding: "20px",
         height: "100vh",
-        backgroundColor: "var(--color-bg-app)",
+        backgroundColor: "var(--bg-primary)",
+        boxSizing: "border-box",
       }}
     >
-      {/* ── Left panel: Session navigation ── */}
-      <aside className="panel flex flex-col overflow-hidden">
+      {/* ── Left panel: Sidebar ── */}
+      <aside
+        style={{
+          background: "var(--surface-primary)",
+          border: "1px solid var(--border-subtle)",
+          borderRadius: "16px",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* Sidebar header */}
         <div
-          className="flex-none px-5 py-4 border-b"
-          style={{ borderColor: "var(--color-border)" }}
+          style={{
+            padding: "20px 20px 16px",
+            borderBottom: "1px solid var(--border-subtle)",
+          }}
         >
           <Link
             href="/sessions"
-            className="text-[18px] font-semibold block"
-            style={{ color: "var(--color-text-primary)" }}
+            style={{ textDecoration: "none" }}
           >
-            Creative Brief
+            <span
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: "16px",
+                fontWeight: 500,
+                color: "var(--text-primary)",
+                letterSpacing: "-0.01em",
+                display: "block",
+              }}
+            >
+              Creative Brief
+            </span>
           </Link>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-3">
-          <div
-            className="rounded-xl px-3 py-2 text-[14px] font-semibold"
+        {/* Active brief item */}
+        <nav style={{ flex: 1, overflowY: "auto", padding: "12px" }}>
+          <p
             style={{
-              backgroundColor: "var(--color-accent-soft)",
-              color: "var(--color-accent)",
+              fontSize: "10px",
+              fontWeight: 600,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: "var(--text-muted)",
+              padding: "4px 10px 8px",
             }}
           >
-            {title ?? "Untitled Brief"}
+            Active
+          </p>
+          <div
+            style={{
+              borderRadius: "10px",
+              padding: "10px 12px",
+              background: "var(--accent-soft)",
+              border: "1px solid rgba(212,175,55,0.15)",
+            }}
+          >
+            <p
+              style={{
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "var(--accent-primary)",
+                lineHeight: 1.4,
+              }}
+            >
+              {title ?? "Untitled Brief"}
+            </p>
           </div>
         </nav>
 
+        {/* Sidebar footer */}
         <div
-          className="flex-none px-4 py-4 border-t"
-          style={{ borderColor: "var(--color-border)" }}
+          style={{
+            padding: "14px 20px",
+            borderTop: "1px solid var(--border-subtle)",
+          }}
         >
           <Link
             href="/sessions"
-            className="flex items-center gap-2 text-[13px]"
-            style={{ color: "var(--color-text-muted)" }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              fontSize: "13px",
+              color: "var(--text-muted)",
+              textDecoration: "none",
+              transition: "color 180ms ease",
+            }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "var(--text-secondary)")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "var(--text-muted)")}
           >
-            ← All briefs
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M9 2L4 7l5 5" />
+            </svg>
+            All briefs
           </Link>
         </div>
       </aside>
 
       {/* ── Center panel: Chat ── */}
-      <main className="panel flex flex-col overflow-hidden">
+      <main
+        style={{
+          background: "var(--surface-primary)",
+          border: "1px solid var(--border-subtle)",
+          borderRadius: "16px",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <ChatInterface
           sessionId={session.id}
           onBriefStateUpdate={refreshBriefState}
@@ -103,8 +170,17 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
         />
       </main>
 
-      {/* ── Right panel: Live brief state ── */}
-      <aside className="panel flex flex-col overflow-hidden">
+      {/* ── Right panel: Brief ── */}
+      <aside
+        style={{
+          background: "var(--surface-primary)",
+          border: "1px solid var(--border-subtle)",
+          borderRadius: "16px",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <BriefPanel sessionId={session.id} briefState={briefState} />
       </aside>
     </div>

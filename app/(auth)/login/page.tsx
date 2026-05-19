@@ -17,7 +17,6 @@ export default function LoginPage() {
   const [magicSent, setMagicSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Client created inside handlers so it is never called during SSR pre-rendering.
   async function handlePasswordLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -53,161 +52,257 @@ export default function LoginPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ backgroundColor: "var(--color-bg-app)" }}
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "var(--bg-primary)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "24px",
+      }}
     >
-      <div
-        className="w-full max-w-[420px] rounded-3xl p-8"
-        style={{
-          backgroundColor: "var(--color-surface-primary)",
-          border: "1px solid var(--color-border)",
-        }}
-      >
-        <div className="mb-8">
-          <h1
-            className="text-[28px] font-[650] leading-9 tracking-tight"
-            style={{ color: "var(--color-text-primary)" }}
+      <div style={{ width: "100%", maxWidth: "400px" }}>
+        {/* Wordmark */}
+        <div style={{ marginBottom: "48px", textAlign: "center" }}>
+          <p
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: "13px",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "var(--accent-primary)",
+              marginBottom: "20px",
+              fontWeight: 500,
+            }}
           >
             Creative Brief
+          </p>
+          <h1
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: "34px",
+              fontWeight: 500,
+              lineHeight: 1.15,
+              letterSpacing: "-0.02em",
+              color: "var(--text-primary)",
+            }}
+          >
+            Welcome back.
           </h1>
-          <p className="mt-1 text-[15px]" style={{ color: "var(--color-text-secondary)" }}>
-            Sign in to your account
+          <p
+            style={{
+              marginTop: "10px",
+              fontSize: "14px",
+              color: "var(--text-muted)",
+              lineHeight: 1.6,
+            }}
+          >
+            Sign in to continue your work.
           </p>
         </div>
 
-        {mode === "password" ? (
-          <form onSubmit={handlePasswordLogin} className="flex flex-col gap-3">
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="h-11 rounded-xl px-4 text-[15px] outline-none transition-colors"
-              style={{
-                border: `1px solid ${error ? "var(--color-error)" : "var(--color-border)"}`,
-                backgroundColor: "var(--color-surface-primary)",
-                color: "var(--color-text-primary)",
-              }}
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="h-11 rounded-xl px-4 text-[15px] outline-none transition-colors"
-              style={{
-                border: `1px solid ${error ? "var(--color-error)" : "var(--color-border)"}`,
-                backgroundColor: "var(--color-surface-primary)",
-                color: "var(--color-text-primary)",
-              }}
-            />
+        {/* Card */}
+        <div
+          style={{
+            background: "var(--surface-primary)",
+            border: "1px solid var(--border-subtle)",
+            borderRadius: "20px",
+            padding: "32px",
+          }}
+        >
+          {mode === "password" ? (
+            <form onSubmit={handlePasswordLogin} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <AuthInput
+                type="email"
+                placeholder="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                hasError={!!error}
+                required
+              />
+              <AuthInput
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                hasError={!!error}
+                required
+              />
 
-            {error && (
-              <p className="text-[13px]" style={{ color: "var(--color-error)" }}>
-                {error}
-              </p>
-            )}
+              {error && <ErrorMessage message={error} />}
 
+              <PrimaryButton type="submit" disabled={loading} style={{ marginTop: "4px" }}>
+                {loading ? "Signing in…" : "Sign in"}
+              </PrimaryButton>
+            </form>
+          ) : magicSent ? (
+            <div
+              style={{
+                background: "var(--accent-soft)",
+                border: "1px solid rgba(212, 175, 55, 0.2)",
+                borderRadius: "12px",
+                padding: "16px",
+                fontSize: "14px",
+                color: "var(--text-secondary)",
+                lineHeight: 1.6,
+              }}
+            >
+              <span style={{ color: "var(--accent-primary)", fontWeight: 600 }}>Check your email</span>
+              {" — we sent a sign-in link to "}
+              <span style={{ color: "var(--text-primary)" }}>{magicEmail}</span>.
+            </div>
+          ) : (
+            <form onSubmit={handleMagicLink} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <AuthInput
+                type="email"
+                placeholder="Email address"
+                value={magicEmail}
+                onChange={(e) => setMagicEmail(e.target.value)}
+                hasError={!!error}
+                required
+              />
+
+              {error && <ErrorMessage message={error} />}
+
+              <PrimaryButton type="submit" disabled={loading} style={{ marginTop: "4px" }}>
+                {loading ? "Sending…" : "Send magic link"}
+              </PrimaryButton>
+            </form>
+          )}
+
+          <Divider />
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", textAlign: "center" }}>
             <button
-              type="submit"
-              disabled={loading}
-              className="mt-1 h-11 rounded-full text-[14px] font-semibold transition-colors disabled:opacity-50"
+              onClick={() => { setMode(mode === "password" ? "magic" : "password"); setError(null); setMagicSent(false); }}
               style={{
-                backgroundColor: "var(--color-accent)",
-                color: "var(--color-text-inverted)",
+                background: "none",
+                border: "none",
+                fontSize: "13px",
+                color: "var(--text-muted)",
+                cursor: "pointer",
+                padding: 0,
+                transition: "color 180ms ease",
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
             >
-              {loading ? "Signing in…" : "Sign in"}
+              {mode === "password" ? "Sign in with magic link instead" : "Sign in with password instead"}
             </button>
-          </form>
-        ) : magicSent ? (
-          <div
-            className="rounded-xl p-4 text-[14px]"
-            style={{
-              backgroundColor: "var(--color-accent-soft)",
-              color: "var(--color-accent)",
-            }}
-          >
-            Check your email — we sent a sign-in link to{" "}
-            <strong>{magicEmail}</strong>.
-          </div>
-        ) : (
-          <form onSubmit={handleMagicLink} className="flex flex-col gap-3">
-            <input
-              type="email"
-              placeholder="Email"
-              value={magicEmail}
-              onChange={(e) => setMagicEmail(e.target.value)}
-              required
-              className="h-11 rounded-xl px-4 text-[15px] outline-none transition-colors"
-              style={{
-                border: "1px solid var(--color-border)",
-                backgroundColor: "var(--color-surface-primary)",
-                color: "var(--color-text-primary)",
-              }}
-            />
 
-            {error && (
-              <p className="text-[13px]" style={{ color: "var(--color-error)" }}>
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="mt-1 h-11 rounded-full text-[14px] font-semibold transition-colors disabled:opacity-50"
-              style={{
-                backgroundColor: "var(--color-accent)",
-                color: "var(--color-text-inverted)",
-              }}
-            >
-              {loading ? "Sending…" : "Send magic link"}
-            </button>
-          </form>
-        )}
-
-        <div className="mt-6 flex flex-col gap-3">
-          <div
-            className="border-t pt-4 text-center text-[13px]"
-            style={{ borderColor: "var(--color-border)", color: "var(--color-text-muted)" }}
-          >
-            {mode === "password" ? (
-              <button
-                onClick={() => { setMode("magic"); setError(null); }}
-                className="underline underline-offset-2"
-                style={{ color: "var(--color-text-secondary)" }}
+            <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>
+              No account?{" "}
+              <Link
+                href="/signup"
+                style={{ color: "var(--accent-primary)", textDecoration: "none", fontWeight: 500 }}
               >
-                Sign in with magic link instead
-              </button>
-            ) : (
-              <button
-                onClick={() => { setMode("password"); setError(null); setMagicSent(false); }}
-                className="underline underline-offset-2"
-                style={{ color: "var(--color-text-secondary)" }}
-              >
-                Sign in with password instead
-              </button>
-            )}
+                Sign up
+              </Link>
+            </p>
           </div>
-
-          <p
-            className="text-center text-[13px]"
-            style={{ color: "var(--color-text-muted)" }}
-          >
-            No account?{" "}
-            <Link
-              href="/signup"
-              className="underline underline-offset-2"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
-              Sign up
-            </Link>
-          </p>
         </div>
       </div>
     </div>
+  );
+}
+
+function AuthInput({
+  type,
+  placeholder,
+  value,
+  onChange,
+  hasError,
+  required,
+}: {
+  type: string;
+  placeholder: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  hasError?: boolean;
+  required?: boolean;
+}) {
+  const [focused, setFocused] = useState(false);
+
+  return (
+    <input
+      type={type}
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      required={required}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      style={{
+        height: "46px",
+        borderRadius: "12px",
+        padding: "0 16px",
+        fontSize: "14px",
+        outline: "none",
+        width: "100%",
+        transition: "border-color 180ms ease, box-shadow 180ms ease",
+        background: "rgba(255,255,255,0.03)",
+        color: "var(--text-primary)",
+        border: `1px solid ${hasError ? "var(--color-error)" : focused ? "var(--accent-primary)" : "var(--border-subtle)"}`,
+        boxShadow: focused && !hasError ? "0 0 0 3px rgba(212,175,55,0.12)" : "none",
+      }}
+    />
+  );
+}
+
+function PrimaryButton({
+  children,
+  type,
+  disabled,
+  style,
+}: {
+  children: React.ReactNode;
+  type?: "submit" | "button";
+  disabled?: boolean;
+  style?: React.CSSProperties;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <button
+      type={type}
+      disabled={disabled}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        height: "46px",
+        borderRadius: "999px",
+        background: hovered && !disabled ? "var(--accent-hover)" : "var(--accent-primary)",
+        color: "#111111",
+        border: "none",
+        fontSize: "14px",
+        fontWeight: 600,
+        cursor: disabled ? "default" : "pointer",
+        opacity: disabled ? 0.5 : 1,
+        transition: "background 180ms ease, box-shadow 180ms ease",
+        boxShadow: hovered && !disabled ? "0 0 24px rgba(212,175,55,0.3)" : "none",
+        ...style,
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Divider() {
+  return (
+    <div
+      style={{
+        borderTop: "1px solid var(--border-subtle)",
+        margin: "24px 0",
+      }}
+    />
+  );
+}
+
+function ErrorMessage({ message }: { message: string }) {
+  return (
+    <p style={{ fontSize: "13px", color: "var(--color-error)", marginTop: "2px" }}>
+      {message}
+    </p>
   );
 }

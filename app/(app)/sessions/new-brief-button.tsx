@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 export default function NewBriefButton() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   async function handleClick() {
     setLoading(true);
@@ -23,10 +24,22 @@ export default function NewBriefButton() {
     <button
       onClick={handleClick}
       disabled={loading}
-      className="h-11 rounded-full px-5 text-[14px] font-semibold transition-colors disabled:opacity-50"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
-        backgroundColor: "var(--color-accent)",
-        color: "var(--color-text-inverted)",
+        height: "40px",
+        borderRadius: "999px",
+        padding: "0 20px",
+        fontSize: "13px",
+        fontWeight: 600,
+        letterSpacing: "0.01em",
+        border: "none",
+        cursor: loading ? "default" : "pointer",
+        background: hovered && !loading ? "var(--accent-hover)" : "var(--accent-primary)",
+        color: "#111111",
+        opacity: loading ? 0.6 : 1,
+        transition: "background 180ms ease, box-shadow 180ms ease",
+        boxShadow: hovered && !loading ? "0 0 20px rgba(212,175,55,0.28)" : "none",
       }}
     >
       {loading ? "Creating…" : "New Brief"}
