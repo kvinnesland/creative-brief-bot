@@ -23,16 +23,21 @@ interface Props {
 
 export function SessionShell({ session, initialBriefState, initialMessages }: Props) {
   const [briefState, setBriefState] = useState<BriefState | null>(initialBriefState);
+  const [title, setTitle] = useState<string | null>(session.title);
 
   const refreshBriefState = useCallback(async () => {
     try {
-      const res = await fetch(`/api/sessions/${session.id}/brief-state`);
-      if (res.ok) {
-        const data = await res.json();
-        setBriefState(data);
+      const [briefRes, sessionRes] = await Promise.all([
+        fetch(`/api/sessions/${session.id}/brief-state`),
+        fetch(`/api/sessions/${session.id}`),
+      ]);
+      if (briefRes.ok) setBriefState(await briefRes.json());
+      if (sessionRes.ok) {
+        const s = await sessionRes.json();
+        if (s.title) setTitle(s.title);
       }
     } catch {
-      // Silently ignore — stale brief state is acceptable; UI stays consistent.
+      // Silently ignore — stale state is acceptable; UI stays consistent.
     }
   }, [session.id]);
 
@@ -70,7 +75,7 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
               color: "var(--color-accent)",
             }}
           >
-            {session.title ?? "Untitled Brief"}
+            {title ?? "Untitled Brief"}
           </div>
         </nav>
 
@@ -93,7 +98,7 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
         <ChatInterface
           sessionId={session.id}
           onBriefStateUpdate={refreshBriefState}
-          initialTitle={session.title}
+          initialTitle={title}
           initialMessages={initialMessages}
         />
       </main>

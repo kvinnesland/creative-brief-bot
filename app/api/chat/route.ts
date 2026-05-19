@@ -4,8 +4,10 @@
 import { NextRequest } from "next/server";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createMessage } from "@/lib/repositories/message-repo";
+import { updateSessionTitle } from "@/lib/repositories/session-repo";
 import { runAnalysisPipeline } from "@/lib/services/brief-service";
 import { streamConversationResponse } from "@/lib/agents/conversation-agent";
+import { generateSessionTitle } from "@/lib/agents/title-generator";
 
 export const dynamic = "force-dynamic";
 
@@ -48,10 +50,10 @@ export async function POST(request: NextRequest) {
     return new Response("Bad Request", { status: 400 });
   }
 
-  // Verify session belongs to user.
+  // Verify session belongs to user; also fetch title to detect first turn.
   const { data: session, error: sessionError } = await supabase
     .from("brief_sessions")
-    .select("id")
+    .select("id, title")
     .eq("id", sessionId)
     .eq("user_id", user.id)
     .single();
@@ -95,9 +97,15 @@ export async function POST(request: NextRequest) {
     analysisResult
   );
 
-  // Persist assistant response after streaming completes.
-  void result.text.then((text) => {
-    createMessage(supabase, sessionId, "assistant", text).catch(console.error);
+  // After streaming: persist assistant message and generate title on first turn.
+  const isFirstTurn = (session as { title: string | null }).title === null;
+  void result.text.then(async (text) => {
+    await createMessage(supabase, sessionId, "assistant", text).catch(console.error);
+    if (isFirstTurn) {
+      generateSessionTitle(latestUserText)
+        .then((title) => updateSessionTitle(supabase, sessionId, title))
+        .catch(console.error);
+    }
   });
 
   return result.toUIMessageStreamResponse();

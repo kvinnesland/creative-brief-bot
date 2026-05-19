@@ -32,6 +32,22 @@ export async function findSessionsByUser(
   return (data ?? []) as BriefSession[];
 }
 
+export async function updateSessionTitle(
+  supabase: SupabaseClient,
+  id: string,
+  title: string
+): Promise<BriefSession> {
+  const { data, error } = await supabase
+    .from("brief_sessions")
+    .update({ title })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as BriefSession;
+}
+
 export async function findSessionById(
   supabase: SupabaseClient,
   id: string
