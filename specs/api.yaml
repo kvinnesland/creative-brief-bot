@@ -1,26 +1,298 @@
 openapi: "3.1.0"
 info:
-  title: "[Project Name] API"
+  title: "Creative Brief Agent API"
   version: "1.0.0"
-  description: "Define all API endpoints here before implementation begins."
+  description: |
+    Internal API for the Creative Brief Agent.
+    All endpoints require an authenticated Supabase session cookie.
+    Authentication is handled by Supabase Auth — no explicit Authorization header needed for browser clients.
 
 servers:
-  - url: "http://localhost:3000/api/v1"
+  - url: "http://localhost:3000/api"
     description: "Local development"
+  - url: "https://your-project.vercel.app/api"
+    description: "Production"
+
+security:
+  - supabaseSession: []
 
 paths:
-  # Define endpoints here
-  # /resource:
-  #   get:
-  #     operationId: listResource
-  #     summary: "List all resources"
-  #     responses:
-  #       "200":
-  #         description: "OK"
+
+  # ── Sessions ──────────────────────────────────────────────────────
+
+  /sessions:
+    get:
+      operationId: listSessions
+      summary: List all brief sessions for the authenticated user
+      tags: [Sessions]
+      responses:
+        "200":
+          description: Array of BriefSession objects, ordered by updated_at desc
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BriefSession"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    post:
+      operationId: createSession
+      summary: Create a new brief session (also creates an empty BriefState)
+      tags: [Sessions]
+      responses:
+        "201":
+          description: Newly created BriefSession
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BriefSession"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /sessions/{id}:
+    get:
+      operationId: getSession
+      summary: Get a single brief session by ID
+      tags: [Sessions]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: BriefSession object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BriefSession"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  # ── Chat ─────────────────────────────────────────────────────────
+
+  /chat:
+    post:
+      operationId: sendChatMessage
+      summary: Send a user message and receive a streaming AI response
+      description: |
+        Runs the full agent pipeline per turn:
+          1. Persists the user ConversationMessage
+          2. Brief Extractor — extracts structured BriefState patch (structured output)
+          3. Gap Finder — identifies unfilled BriefState fields
+          4. Contradiction Checker — detects conflicting values in BriefState
+          5. Updates BriefState in DB (fire-and-forget, does not block stream)
+          6. Conversation Agent — streams a natural response with follow-up questions
+          7. Persists the assistant ConversationMessage on stream completion
+
+        Response is a Vercel AI SDK data stream (text/event-stream).
+        The client should use the Vercel AI SDK `useChat` hook or equivalent to consume it.
+      tags: [Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id, message]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                  description: The session this message belongs to
+                message:
+                  type: string
+                  minLength: 1
+                  maxLength: 4000
+                  description: The user's message text
+      responses:
+        "200":
+          description: |
+            Vercel AI SDK data stream (text/event-stream).
+            Streams the Conversation Agent response token by token.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: Server-sent events in Vercel AI SDK stream protocol
+        "400":
+          description: Invalid request (missing fields, message too long)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          description: Rate limit exceeded (60 requests/min per user)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  # ── Auth ─────────────────────────────────────────────────────────
+
+  /auth/signout:
+    post:
+      operationId: signOut
+      summary: Sign out the current user and clear session cookies
+      tags: [Auth]
+      responses:
+        "302":
+          description: Redirect to /login
 
 components:
-  schemas: {}
+
+  schemas:
+
+    BriefSession:
+      type: object
+      required: [id, user_id, status, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [in_progress, completed, archived]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    BriefState:
+      type: object
+      required: [id, session_id, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        business_goal:
+          type: string
+          nullable: true
+        target_audience:
+          type: string
+          nullable: true
+        core_message:
+          type: string
+          nullable: true
+        tone_of_voice:
+          type: string
+          nullable: true
+        visual_direction:
+          type: string
+          nullable: true
+        deliverables:
+          type: array
+          items:
+            type: string
+          nullable: true
+        constraints:
+          type: array
+          items:
+            type: string
+          nullable: true
+        open_questions:
+          type: array
+          items:
+            type: string
+          nullable: true
+        confidence_scores:
+          type: object
+          additionalProperties:
+            type: number
+            minimum: 0
+            maximum: 1
+          nullable: true
+          description: Map of BriefState field name → confidence 0.0–1.0
+        updated_at:
+          type: string
+          format: date-time
+
+    ConversationMessage:
+      type: object
+      required: [id, session_id, role, content, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
+  responses:
+    Unauthorized:
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Authenticated but not authorized to access this resource
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
+    supabaseSession:
+      type: apiKey
+      in: cookie
+      name: sb-access-token
+      description: Supabase session cookie set by @supabase/ssr

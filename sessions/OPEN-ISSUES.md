@@ -10,15 +10,16 @@ Priority: High | Medium | Low
 Area: [module or system]
 Description: [what is the problem]
 Blocker for: [what cannot proceed until resolved]
-Opened: YYYY-MM-DD
+Opened: 2026-05-19
 ```
 
 ## Open Issues
 
 ISSUE-001
-Status: Open
+Status: Resolved
 Priority: High
 Area: specs/
 Description: Product vision and requirements not yet defined.
 Blocker for: All feature work
-Opened: YYYY-MM-DD
+Opened: 2026-05-19
+Resolved: 2026-05-19 — All spec files written (vision, requirements, entities, architecture, flows, nfr)
