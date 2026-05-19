@@ -17,7 +17,7 @@ DECIDED BY: human | Claude | both
 ## Decisions
 
 DATE: 2026-05-19
-DECISION: Select tech stack — Next.js 14 / Supabase / OpenAI / Vercel
+DECISION: Select tech stack — Next.js 16 / Supabase / OpenAI / Vercel
 CONTEXT: Tech stack needed before any implementation begins.
 DECISION: Next.js App Router (TypeScript), Supabase (Postgres + Auth + Storage), OpenAI API (chat + structured outputs + Realtime API for voice), Vercel AI SDK, deployed on Vercel.
 ALTERNATIVES CONSIDERED: Remix + PlanetScale; SvelteKit; Django backend with React frontend.
@@ -68,4 +68,13 @@ DECISION: Implement full governance structure with CLAUDE.md, session orchestrat
 ALTERNATIVES CONSIDERED: Ad-hoc prompting; rules-only approach.
 RATIONALE: Ad-hoc prompting loses context between sessions. Explicit structure makes AI behavior deterministic and auditable.
 CONSEQUENCES: All changes require a CR. Sessions start and end with orchestration file updates.
+DECIDED BY: human
+
+DATE: 2026-05-19
+DECISION: Full dark premium editorial visual redesign
+CONTEXT: Original beige/light theme felt generic, startup-SaaS, and template-like. Product ambition is a luxury creative operating system for serious creative strategists.
+DECISION: Replace entire design system with dark surfaces (#0D0D0D base), warm muted gold accent (#D4AF37), Playfair Display serif headings paired with Inter body, 3-column shell resized to 300px / flex / 420px with 20px gaps, cinematic glass-effect assistant messages, gold-tinted user messages, thin 2px progress bar with gold glow.
+ALTERNATIVES CONSIDERED: Keeping light theme with richer tokens; partial dark mode via prefers-color-scheme; blue-grey dark palette.
+RATIONALE: Gold + dark surfaces conveys exclusivity, editorial intelligence, and calm focus. Playfair Display creates immediate typographic differentiation. The emotional target ("This is where serious creative thinking happens") required a full systemic shift, not incremental polish.
+CONSEQUENCES: specs/ui-spec.md is now out of sync with implementation — should be updated before next UI CR. All future components must use CSS custom properties from globals.css, not hardcoded values.
 DECIDED BY: human

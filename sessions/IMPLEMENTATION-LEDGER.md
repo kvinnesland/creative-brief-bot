@@ -24,3 +24,22 @@
 | 2026-05-19 | Session 2 | app/api/sessions/[id]/brief-state/ | GET brief-state endpoint for client polling | CR-002 | Build PASS |
 | 2026-05-19 | Session 2 | app/(app)/sessions/[id]/ | session-shell, chat-interface, brief-panel (AI SDK v6 useChat + DefaultChatTransport) | CR-002 | Build PASS |
 | 2026-05-19 | Session 2 | tests/unit/ | gap-finder.test.ts — 5 unit tests | CR-002 | 5/5 PASS |
+| 2026-05-19 | Session 3 | app/(app)/sessions/[id]/page.tsx | Hydrate chat history from DB into useChat initialMessages on page load | CR-002 | Build PASS |
+| 2026-05-19 | Session 3 | app/api/chat/route.ts | Auto-generate session title from first user message turn | — | Build PASS |
+| 2026-05-19 | Session 3 | app/api/sessions/[id]/export/ | GET endpoint — streams creative-brief.md markdown download | CR-003 | Build PASS |
+| 2026-05-19 | Session 3 | app/(app)/sessions/[id]/brief-panel.tsx | Export button wired to download endpoint | CR-003 | Build PASS |
+| 2026-05-19 | Session 3 | vercel.json | Remove deprecated @secret refs | — | Build PASS |
+| 2026-05-19 | Session 3 | app/api/sessions/[id]/share/ | POST — generate share token, persist to DB, return shareable URL | CR-003 | Build PASS |
+| 2026-05-19 | Session 3 | app/briefs/[token]/ | Public read-only brief page — no auth, resolves via share token | CR-003 | Build PASS |
+| 2026-05-19 | Session 3 | lib/repositories/session-repo.ts | findSessionByShareToken added | CR-003 | Build PASS |
+| 2026-05-19 | Session 3 | app/briefs/[token]/page.tsx | DB error handling — 404 instead of 500 on lookup failure | CR-003 | Build PASS |
+| 2026-05-19 | Session 4 | app/globals.css | Full dark token system: #0D0D0D bg, #D4AF37 gold accent, layered surfaces, noise texture | — | Build PASS |
+| 2026-05-19 | Session 4 | app/layout.tsx | Playfair Display + Inter loaded via next/font/google as CSS variables | — | Build PASS |
+| 2026-05-19 | Session 4 | app/(auth)/login/page.tsx | Cinematic dark auth card, Playfair heading, gold-glow input focus states | — | Build PASS |
+| 2026-05-19 | Session 4 | app/(auth)/signup/page.tsx | Cinematic dark auth card (same pattern as login) | — | Build PASS |
+| 2026-05-19 | Session 4 | app/(app)/sessions/page.tsx | Dark editorial sessions list, Playfair headings, uppercase tracked labels | — | Build PASS |
+| 2026-05-19 | Session 4 | app/(app)/sessions/new-brief-button.tsx | Gold pill button with hover glow | — | Build PASS |
+| 2026-05-19 | Session 4 | app/(app)/sessions/[id]/session-shell.tsx | Dark 3-column shell: 300px / flex / 420px, 20px gaps, dark panels | — | Build PASS |
+| 2026-05-19 | Session 4 | app/(app)/sessions/[id]/chat-interface.tsx | Glass assistant bubbles, gold-tinted user bubbles, auto-expanding textarea, arrow send button | — | Build PASS |
+| 2026-05-19 | Session 4 | app/(app)/sessions/[id]/brief-panel.tsx | 2px thin gold progress bar with glow, uppercase section labels, 1px confidence bars | — | Build PASS |
+| 2026-05-19 | Session 4 | app/briefs/[token]/page.tsx | Premium public brief layout: 40px Playfair title, gold dashes, dark card with dividers | — | Build PASS |
