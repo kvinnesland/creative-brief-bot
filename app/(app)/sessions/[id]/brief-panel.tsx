@@ -20,6 +20,8 @@ const SECTIONS: { label: string; key: keyof BriefState }[] = [
 
 export function BriefPanel({ sessionId, briefState }: Props) {
   const [exporting, setExporting] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [copied, setCopied] = useState(false);
   const confidence = briefState?.confidence_scores as Record<string, number> | null;
 
   const deliverables = briefState?.deliverables ?? [];
@@ -33,6 +35,23 @@ export function BriefPanel({ sessionId, briefState }: Props) {
 
   const completionPct = Math.round((totalFilled / 7) * 100);
   const canExport = totalFilled > 0;
+
+  async function handleShare() {
+    if (!canExport || sharing) return;
+    setSharing(true);
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/share`, { method: "POST" });
+      if (!res.ok) throw new Error();
+      const { url } = await res.json();
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // Silent — user can retry.
+    } finally {
+      setSharing(false);
+    }
+  }
 
   async function handleExport() {
     if (!canExport || exporting) return;
@@ -202,19 +221,35 @@ export function BriefPanel({ sessionId, briefState }: Props) {
         className="flex-none px-4 py-4 border-t"
         style={{ borderColor: "var(--color-border)" }}
       >
-        <button
-          onClick={handleExport}
-          disabled={!canExport || exporting}
-          className="w-full h-11 rounded-full text-[14px] font-semibold transition-opacity"
-          style={{
-            backgroundColor: "var(--color-accent)",
-            color: "var(--color-text-inverted)",
-            opacity: !canExport || exporting ? 0.4 : 1,
-            cursor: !canExport || exporting ? "default" : "pointer",
-          }}
-        >
-          {exporting ? "Exporting…" : "Export Brief"}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleShare}
+            disabled={!canExport || sharing}
+            className="flex-1 h-11 rounded-full text-[14px] font-semibold transition-opacity"
+            style={{
+              border: "1px solid var(--color-accent)",
+              backgroundColor: "transparent",
+              color: "var(--color-accent)",
+              opacity: !canExport || sharing ? 0.4 : 1,
+              cursor: !canExport || sharing ? "default" : "pointer",
+            }}
+          >
+            {copied ? "Copied!" : sharing ? "Sharing…" : "Share"}
+          </button>
+          <button
+            onClick={handleExport}
+            disabled={!canExport || exporting}
+            className="flex-1 h-11 rounded-full text-[14px] font-semibold transition-opacity"
+            style={{
+              backgroundColor: "var(--color-accent)",
+              color: "var(--color-text-inverted)",
+              opacity: !canExport || exporting ? 0.4 : 1,
+              cursor: !canExport || exporting ? "default" : "pointer",
+            }}
+          >
+            {exporting ? "Exporting…" : "Export"}
+          </button>
+        </div>
       </div>
     </>
   );

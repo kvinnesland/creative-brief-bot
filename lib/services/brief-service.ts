@@ -13,14 +13,15 @@ export async function runAnalysisPipeline(
   supabase: SupabaseClient,
   sessionId: string,
   conversationHistory: { role: "user" | "assistant"; content: string }[],
-  latestUserMessage: string
+  latestUserMessage: string,
+  urlContext?: string
 ): Promise<{ briefState: BriefState; analysisResult: AnalysisResult }> {
   const currentBriefState = await findBriefStateBySession(supabase, sessionId);
   if (!currentBriefState) throw new Error(`No brief state found for session ${sessionId}`);
 
   // Run extraction and contradiction-checking in parallel.
   const [patch, contradictions] = await Promise.all([
-    extractBriefState(conversationHistory, currentBriefState),
+    extractBriefState(conversationHistory, currentBriefState, urlContext),
     findContradictions(currentBriefState, latestUserMessage),
   ]);
 

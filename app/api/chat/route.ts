@@ -1,4 +1,5 @@
 // CR-002: Chat API route — streaming conversation endpoint.
+// CR-003: URL context injection added.
 // POST /api/chat — receives UIMessage[] from useChat, runs analysis pipeline, streams response.
 
 import { NextRequest } from "next/server";
@@ -8,6 +9,7 @@ import { updateSessionTitle } from "@/lib/repositories/session-repo";
 import { runAnalysisPipeline } from "@/lib/services/brief-service";
 import { streamConversationResponse } from "@/lib/agents/conversation-agent";
 import { generateSessionTitle } from "@/lib/agents/title-generator";
+import { extractUrls, fetchUrlContent } from "@/lib/services/url-fetcher";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +73,14 @@ export async function POST(request: NextRequest) {
     return new Response("Bad Request", { status: 400 });
   }
 
+  // Fetch URL content if the user pasted any links (runs in parallel with nothing yet).
+  const urls = extractUrls(latestUserText);
+  const urlContents = await Promise.all(urls.map(fetchUrlContent));
+  const urlContext = urls
+    .map((url, i) => urlContents[i] ? `[Content from ${url}]:\n${urlContents[i]}` : null)
+    .filter(Boolean)
+    .join("\n\n");
+
   // Persist user message to DB.
   await createMessage(supabase, sessionId, "user", latestUserText);
 
@@ -87,7 +97,8 @@ export async function POST(request: NextRequest) {
     supabase,
     sessionId,
     conversationHistory,
-    latestUserText
+    latestUserText,
+    urlContext || undefined
   );
 
   // Stream the conversation response.

@@ -32,6 +32,36 @@ export async function findSessionsByUser(
   return (data ?? []) as BriefSession[];
 }
 
+export async function generateShareToken(
+  supabase: SupabaseClient,
+  id: string
+): Promise<string> {
+  // Use Postgres gen_random_uuid() via a DB function call to generate the token.
+  const token = crypto.randomUUID();
+  const { error } = await supabase
+    .from("brief_sessions")
+    .update({ share_token: token })
+    .eq("id", id);
+  if (error) throw error;
+  return token;
+}
+
+export async function findSessionByShareToken(
+  supabase: SupabaseClient,
+  token: string
+): Promise<BriefSession | null> {
+  const { data, error } = await supabase
+    .from("brief_sessions")
+    .select()
+    .eq("share_token", token)
+    .single();
+  if (error) {
+    if (error.code === "PGRST116") return null;
+    throw error;
+  }
+  return data as BriefSession;
+}
+
 export async function updateSessionTitle(
   supabase: SupabaseClient,
   id: string,

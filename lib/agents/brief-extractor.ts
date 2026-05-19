@@ -41,8 +41,13 @@ const extractionSchema = z.object({
 
 export async function extractBriefState(
   conversationHistory: { role: "user" | "assistant"; content: string }[],
-  currentBriefState: BriefState
+  currentBriefState: BriefState,
+  urlContext?: string
 ): Promise<BriefStatePatch> {
+  const urlSection = urlContext
+    ? `\nReference content fetched from URLs shared by the user:\n${urlContext}\n`
+    : "";
+
   const system = `You are a creative brief analyst. Extract structured information from the conversation.
 
 Current brief state (already confirmed):
@@ -55,9 +60,9 @@ ${JSON.stringify({
   deliverables: currentBriefState.deliverables,
   constraints: currentBriefState.constraints,
 }, null, 2)}
-
+${urlSection}
 Rules:
-- Only extract information that was explicitly stated in the conversation. Do not infer or assume.
+- Only extract information that was explicitly stated in the conversation or the URL content above. Do not infer or assume.
 - Confidence: 0.9+ = clearly stated; 0.7-0.9 = reasonably clear; 0.5-0.7 = implied; below 0.5 = do not extract.
 - If a field is already filled in the current state and the user has not contradicted it, carry it forward with high confidence.
 - For fields where nothing was mentioned, set value to null.
