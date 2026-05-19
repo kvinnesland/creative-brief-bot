@@ -105,7 +105,7 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
 
       {/* ── Right panel: Live brief state ── */}
       <aside className="panel flex flex-col overflow-hidden">
-        <BriefPanel briefState={briefState} />
+        <BriefPanel sessionId={session.id} briefState={briefState} />
       </aside>
     </div>
   );

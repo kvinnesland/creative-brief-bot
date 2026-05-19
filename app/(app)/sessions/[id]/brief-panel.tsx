@@ -2,9 +2,11 @@
 
 // CR-002: Brief panel — live brief state display, refreshes after each turn.
 
+import { useState } from "react";
 import type { BriefState } from "@/lib/types/entities";
 
 interface Props {
+  sessionId: string;
   briefState: BriefState | null;
 }
 
@@ -16,18 +18,44 @@ const SECTIONS: { label: string; key: keyof BriefState }[] = [
   { label: "Visual direction", key: "visual_direction" },
 ];
 
-export function BriefPanel({ briefState }: Props) {
+export function BriefPanel({ sessionId, briefState }: Props) {
+  const [exporting, setExporting] = useState(false);
   const confidence = briefState?.confidence_scores as Record<string, number> | null;
 
   const deliverables = briefState?.deliverables ?? [];
   const constraints = briefState?.constraints ?? [];
   const openQuestions = briefState?.open_questions ?? [];
 
-  const totalFilled = SECTIONS.filter(
-    ({ key }) => briefState?.[key] != null
-  ).length + (deliverables.length > 0 ? 1 : 0) + (constraints.length > 0 ? 1 : 0);
+  const totalFilled =
+    SECTIONS.filter(({ key }) => briefState?.[key] != null).length +
+    (deliverables.length > 0 ? 1 : 0) +
+    (constraints.length > 0 ? 1 : 0);
 
   const completionPct = Math.round((totalFilled / 7) * 100);
+  const canExport = totalFilled > 0;
+
+  async function handleExport() {
+    if (!canExport || exporting) return;
+    setExporting(true);
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/export`);
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const disposition = res.headers.get("Content-Disposition") ?? "";
+      const match = disposition.match(/filename="([^"]+)"/);
+      const filename = match?.[1] ?? "creative-brief.md";
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // Silent — export is non-critical; user can retry.
+    } finally {
+      setExporting(false);
+    }
+  }
 
   return (
     <>
@@ -175,15 +203,17 @@ export function BriefPanel({ briefState }: Props) {
         style={{ borderColor: "var(--color-border)" }}
       >
         <button
-          disabled={completionPct < 100}
+          onClick={handleExport}
+          disabled={!canExport || exporting}
           className="w-full h-11 rounded-full text-[14px] font-semibold transition-opacity"
           style={{
             backgroundColor: "var(--color-accent)",
             color: "var(--color-text-inverted)",
-            opacity: completionPct < 100 ? 0.4 : 1,
+            opacity: !canExport || exporting ? 0.4 : 1,
+            cursor: !canExport || exporting ? "default" : "pointer",
           }}
         >
-          Export Brief
+          {exporting ? "Exporting…" : "Export Brief"}
         </button>
       </div>
     </>
