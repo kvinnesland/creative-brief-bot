@@ -15,11 +15,19 @@ export default async function SharedBriefPage({ params }: Props) {
   const { token } = await params;
   const supabase = await createClient();
 
-  const session = await findSessionByShareToken(supabase, token);
-  if (!session) notFound();
-
-  const briefState = await findBriefStateBySession(supabase, session.id);
-  if (!briefState) notFound();
+  let session, briefState;
+  try {
+    session = await findSessionByShareToken(supabase, token);
+    if (!session) notFound();
+    briefState = await findBriefStateBySession(supabase, session.id);
+    if (!briefState) notFound();
+  } catch (e: unknown) {
+    // notFound() throws internally — re-throw it; swallow real DB errors as 404.
+    if (e instanceof Error && e.message === "NEXT_NOT_FOUND") throw e;
+    const isNotFound = e && typeof e === "object" && "digest" in e;
+    if (isNotFound) throw e;
+    notFound();
+  }
 
   return (
     <div
