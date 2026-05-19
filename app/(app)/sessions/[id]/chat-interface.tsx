@@ -7,13 +7,20 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useState, useRef, useEffect, useMemo } from "react";
 
+interface UIMessage {
+  id: string;
+  role: "user" | "assistant";
+  parts: { type: "text"; text: string }[];
+}
+
 interface Props {
   sessionId: string;
   onBriefStateUpdate: () => void;
   initialTitle: string | null;
+  initialMessages: UIMessage[];
 }
 
-export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle }: Props) {
+export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, initialMessages }: Props) {
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -28,6 +35,7 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle }: P
 
   const { messages, status, sendMessage } = useChat({
     transport,
+    messages: initialMessages,
     onFinish: () => {
       onBriefStateUpdate();
     },

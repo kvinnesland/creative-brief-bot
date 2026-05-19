@@ -9,12 +9,19 @@ import { BriefPanel } from "./brief-panel";
 import type { BriefState, BriefSession } from "@/lib/types/entities";
 import Link from "next/link";
 
+interface UIMessage {
+  id: string;
+  role: "user" | "assistant";
+  parts: { type: "text"; text: string }[];
+}
+
 interface Props {
   session: BriefSession;
   initialBriefState: BriefState | null;
+  initialMessages: UIMessage[];
 }
 
-export function SessionShell({ session, initialBriefState }: Props) {
+export function SessionShell({ session, initialBriefState, initialMessages }: Props) {
   const [briefState, setBriefState] = useState<BriefState | null>(initialBriefState);
 
   const refreshBriefState = useCallback(async () => {
@@ -87,6 +94,7 @@ export function SessionShell({ session, initialBriefState }: Props) {
           sessionId={session.id}
           onBriefStateUpdate={refreshBriefState}
           initialTitle={session.title}
+          initialMessages={initialMessages}
         />
       </main>
 
