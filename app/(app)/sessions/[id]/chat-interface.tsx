@@ -41,6 +41,12 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    if (!isStreaming) {
+      textareaRef.current?.focus();
+    }
+  }, [isStreaming]);
+
   function submit() {
     if (!input.trim() || isStreaming) return;
     sendMessage({ text: input });
