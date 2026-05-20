@@ -19,6 +19,9 @@ FEATURE-COMPLETE MVP — Full conversation pipeline, brief management, export, s
 | `app/api/sessions/[id]/export/` | GET markdown export | Done CR-003 |
 | `app/api/sessions/[id]/export/pdf/` | GET PDF export — @react-pdf/renderer server-side | Done CR-004 |
 | `lib/pdf/brief-pdf.tsx` | BriefDocument component — light editorial PDF layout | Done CR-004 |
+| `app/api/auth/signup/` | POST signup gate — domain validation + admin.createUser | Done CR-005 |
+| `lib/auth/domain-allowlist.ts` | isAllowedDomain — queries allowed_domains table via service role | Done CR-005 |
+| `db/migrations/003_allowed_domains.sql` | allowed_domains table — DB-backed email domain allowlist | Done CR-005 |
 | `app/api/sessions/[id]/share/` | POST generate share token + URL | Done CR-003 |
 | `app/api/chat/` | POST streaming chat endpoint | Done CR-002 |
 | `app/api/auth/signout/` | Sign-out route | Done CR-001 |
@@ -79,4 +82,4 @@ Dark premium editorial theme:
 - All inline styles reference CSS custom properties (not raw hex values) for theme consistency
 
 ## Last Structural Change
-2026-05-20 — CR-004: PDF export. New lib/pdf/ module (BriefDocument) + GET /api/sessions/[id]/export/pdf route. @react-pdf/renderer declared as serverExternalPackage in next.config.ts.
+2026-05-20 — CR-005: Domain-restricted signup. New allowed_domains table (migration 003). New lib/auth/ module (domain-allowlist.ts). New POST /api/auth/signup route. signup/page.tsx now calls API route + signInWithPassword instead of direct supabase.auth.signUp.

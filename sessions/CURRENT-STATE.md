@@ -22,6 +22,8 @@ None.
 - CR-002: Core Conversation Pipeline — Status: Done
 - CR-003: Shareable Brief Links + Export — Status: Done
 - CR-004: PDF Export — Status: Done
+- CR-005: Domain-Restricted Signup — Status: Done
+- CR-006: Mobile-Responsive Layout — Status: Done
 
 ## Recently Modified Systems (Session 3+)
 
@@ -57,9 +59,9 @@ None.
 - app/briefs/[token]/page.tsx — premium public brief layout
 
 ## Validation Status
-- `npm run build` — PASS (2026-05-20, Session 5)
+- `npm run build` — PASS (2026-05-20, Session 6, CR-006)
 - `npx tsc --noEmit` — 0 errors (2026-05-20)
-- `npx vitest run tests/unit` — 13/13 PASS (2026-05-20)
+- `npx vitest run tests/unit` — 27/27 PASS (2026-05-20)
 - Deployed to Vercel: creative-brief-bot.vercel.app — LIVE (commit faf8a3b)
 
 ## Known Limitations (acceptable for MVP)

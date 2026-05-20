@@ -49,3 +49,14 @@
 | 2026-05-20 | Session 5 | tests/unit/brief-pdf.test.tsx | 3 unit tests: empty state, full state, omitted title | CR-004 | 13/13 total unit tests PASS |
 | 2026-05-20 | Session 5 | app/(app)/sessions/session-card.tsx | New "use client" component — SessionCard + StatusBadge extracted from server page | — | Build PASS, 500 resolved |
 | 2026-05-20 | Session 5 | app/(app)/sessions/page.tsx | Removed onMouseEnter/onMouseLeave from server component; now imports SessionCard | — | Build PASS |
+| 2026-05-20 | Session 6 | db/migrations/003_allowed_domains.sql | New table allowed_domains (id, domain, created_at) + RLS + seed bas.no | CR-005 | Build PASS |
+| 2026-05-20 | Session 6 | lib/auth/domain-allowlist.ts | extractDomain + isAllowedDomain — queries allowed_domains via service role client | CR-005 | tsc 0 errors, 8/8 unit tests PASS |
+| 2026-05-20 | Session 6 | app/api/auth/signup/route.ts | POST — domain validation gate + admin.createUser | CR-005 | Build PASS |
+| 2026-05-20 | Session 6 | app/(auth)/signup/page.tsx | Calls /api/auth/signup then signInWithPassword; removes direct supabase.auth.signUp | CR-005 | Build PASS |
+| 2026-05-20 | Session 6 | tests/unit/domain-allowlist.test.ts | 8 unit tests: extractDomain (5) + isAllowedDomain (3) | CR-005 | 21/21 total PASS |
+| 2026-05-20 | Session 6 | lib/utils/brief-progress.ts | calcProgress — averages confidence_scores to 0–100 integer | CR-006 | 6/6 unit tests PASS |
+| 2026-05-20 | Session 6 | lib/hooks/use-window-width.ts | SSR-safe resize hook, 100ms debounce | CR-006 | Build PASS |
+| 2026-05-20 | Session 6 | app/(app)/sessions/[id]/session-shell.tsx | Mobile layout: single-column + bottom tab bar (Chat/Brief) + live progress % + gold bar | CR-006 | Build PASS |
+| 2026-05-20 | Session 6 | app/(app)/sessions/[id]/chat-interface.tsx | backHref prop → back chevron in header; SendButton 44×44 for touch | CR-006 | Build PASS |
+| 2026-05-20 | Session 6 | app/(app)/sessions/page.tsx | Nav padding 32px→20px for mobile | CR-006 | Build PASS |
+| 2026-05-20 | Session 6 | tests/unit/brief-progress.test.ts | 6 unit tests for calcProgress | CR-006 | 27/27 total PASS |
