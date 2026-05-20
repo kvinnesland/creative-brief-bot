@@ -4,6 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { useSpeechRecognition } from "@/lib/hooks/use-speech-recognition";
 
 interface UIMessage {
   id: string;
@@ -36,6 +37,17 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
   });
 
   const isStreaming = status === "streaming" || status === "submitted";
+
+  const { state: speechState, toggle: toggleSpeech } = useSpeechRecognition({
+    onResult: (transcript) => {
+      setInput((prev) => (prev ? prev + " " + transcript : transcript));
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height =
+          Math.min(textareaRef.current.scrollHeight, 120) + "px";
+      }
+    },
+  });
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -244,6 +256,9 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
               fontFamily: "var(--font-sans)",
             }}
           />
+          {speechState !== "unavailable" && (
+            <MicButton state={speechState} onClick={toggleSpeech} disabled={isStreaming} />
+          )}
           <SendButton onClick={submit} disabled={!input.trim() || isStreaming} />
         </div>
         <p
@@ -255,7 +270,7 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
             letterSpacing: "0.02em",
           }}
         >
-          Enter for å sende · Shift+Enter for ny linje
+          Enter for å sende · Shift+Enter for ny linje{speechState !== "unavailable" ? " · Mikrofon for tale" : ""}
         </p>
       </div>
     </>
@@ -323,6 +338,37 @@ function MessageBubble({ role, text }: { role: "user" | "assistant"; text: strin
         <span style={{ whiteSpace: "pre-wrap" }}>{text}</span>
       </div>
     </div>
+  );
+}
+
+function MicButton({ state, onClick, disabled }: { state: "idle" | "listening"; onClick: () => void; disabled: boolean }) {
+  const isListening = state === "listening";
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      title={isListening ? "Stopp opptak" : "Tal inn svar"}
+      style={{
+        width: "36px",
+        height: "36px",
+        borderRadius: "8px",
+        border: isListening ? "1px solid rgba(212,175,55,0.4)" : "1px solid var(--border-subtle)",
+        flexShrink: 0,
+        cursor: disabled ? "default" : "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: isListening ? "rgba(212,175,55,0.12)" : "transparent",
+        transition: "background 180ms ease, border-color 180ms ease",
+        animation: isListening ? "pulse 1.4s ease-in-out infinite" : "none",
+      }}
+    >
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke={isListening ? "var(--accent-primary)" : "var(--text-muted)"} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="4.5" y="1" width="5" height="8" rx="2.5" />
+        <path d="M2 7.5a5 5 0 0 0 10 0" />
+        <line x1="7" y1="12.5" x2="7" y2="11" />
+      </svg>
+    </button>
   );
 }
 
