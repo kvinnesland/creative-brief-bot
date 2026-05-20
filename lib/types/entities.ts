@@ -79,6 +79,7 @@ export interface BriefStatePatch {
   tone_of_voice?: string;
   deliverables?: string[];
   constraints?: string[];
+  open_questions?: string[];
   confidence_scores?: Record<string, number>;
 }
 

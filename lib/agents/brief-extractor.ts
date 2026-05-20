@@ -114,7 +114,7 @@ Rules:
   }
 
   if (object.open_questions.length > 0) {
-    patch.confidence_scores = { ...confidence_scores };
+    patch.open_questions = object.open_questions;
   }
 
   return { ...patch, confidence_scores };

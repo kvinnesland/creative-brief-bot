@@ -37,6 +37,7 @@ export default async function SessionDetailPage({ params }: Props) {
 
   return (
     <SessionShell
+      key={session.id}
       session={session}
       initialBriefState={briefState}
       initialMessages={initialMessages}

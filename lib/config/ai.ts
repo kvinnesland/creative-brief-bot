@@ -3,8 +3,8 @@
 
 import { openai } from "@ai-sdk/openai";
 
-export const ANALYSIS_MODEL = openai("gpt-4o-mini");
-export const CONVERSATION_MODEL = openai("gpt-4o-mini");
+export const ANALYSIS_MODEL = openai("gpt-4o");
+export const CONVERSATION_MODEL = openai("gpt-4o");
 
 // Confidence threshold: BriefState fields are only written if extraction
 // confidence meets this minimum. Prevents noisy/speculative data polluting the brief.
