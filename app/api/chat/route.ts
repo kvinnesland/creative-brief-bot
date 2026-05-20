@@ -93,20 +93,28 @@ export async function POST(request: NextRequest) {
     }));
 
   // Run analysis pipeline (extraction + gap-finding + contradiction-checking).
-  const { briefState, analysisResult } = await runAnalysisPipeline(
-    supabase,
-    sessionId,
-    conversationHistory,
-    latestUserText,
-    urlContext || undefined
-  );
+  // If the pipeline fails (e.g. DB error), fall back to empty analysis so the
+  // conversation still streams rather than hanging.
+  let briefState: Awaited<ReturnType<typeof runAnalysisPipeline>>["briefState"] | null = null;
+  let analysisResult: Awaited<ReturnType<typeof runAnalysisPipeline>>["analysisResult"] = {
+    patch: {},
+    gaps: [],
+    contradictions: [],
+  };
+  try {
+    ({ briefState, analysisResult } = await runAnalysisPipeline(
+      supabase,
+      sessionId,
+      conversationHistory,
+      latestUserText,
+      urlContext || undefined
+    ));
+  } catch (err) {
+    console.error("[chat] pipeline error:", err);
+  }
 
   // Stream the conversation response.
-  const result = streamConversationResponse(
-    conversationHistory,
-    briefState,
-    analysisResult
-  );
+  const result = streamConversationResponse(conversationHistory, briefState, analysisResult);
 
   // After streaming: persist assistant message and generate title on first turn.
   const isFirstTurn = (session as { title: string | null }).title === null;

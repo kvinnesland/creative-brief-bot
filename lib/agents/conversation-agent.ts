@@ -77,12 +77,22 @@ Dine regler:
 - Vær direkte, varm og intellektuelt nysgjerrig. Unngå corporate-speak.`;
 }
 
+const EMPTY_BRIEF_STATE: BriefState = {
+  id: "", session_id: "",
+  background: null, problem_statement: null, business_goal: null,
+  communication_goal: null, target_audience: null, insight: null,
+  core_message: null, reasons_to_believe: null, tone_of_voice: null,
+  visual_direction: null, deliverables: null, constraints: null,
+  open_questions: null, confidence_scores: null,
+  updated_at: "",
+};
+
 export function streamConversationResponse(
   conversationHistory: { role: "user" | "assistant"; content: string }[],
-  briefState: BriefState,
+  briefState: BriefState | null,
   analysisResult: AnalysisResult
 ) {
-  const system = buildSystemPrompt(briefState, analysisResult);
+  const system = buildSystemPrompt(briefState ?? EMPTY_BRIEF_STATE, analysisResult);
 
   return streamText({
     model: CONVERSATION_MODEL,
