@@ -39,37 +39,48 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
     window.speechSynthesis.cancel();
     const utt = new SpeechSynthesisUtterance(text);
     utt.lang = "nb-NO";
-    // Prefer a Norwegian voice if available.
-    const voices = window.speechSynthesis.getVoices();
-    const nbVoice = voices.find((v) => v.lang.startsWith("nb") || v.lang.startsWith("no"));
-    if (nbVoice) utt.voice = nbVoice;
     utt.rate = 1.05;
     utt.onend = onDone;
     utt.onerror = onDone;
-    window.speechSynthesis.speak(utt);
+    // Voices may not be loaded yet — wait for them if needed.
+    const trySpeak = () => {
+      const voices = window.speechSynthesis.getVoices();
+      const nbVoice = voices.find((v) => v.lang.startsWith("nb") || v.lang.startsWith("no"));
+      if (nbVoice) utt.voice = nbVoice;
+      window.speechSynthesis.speak(utt);
+    };
+    if (window.speechSynthesis.getVoices().length > 0) {
+      trySpeak();
+    } else {
+      window.speechSynthesis.onvoiceschanged = () => { trySpeak(); };
+    }
   }
 
   const { messages, status, sendMessage } = useChat({
     transport,
     messages: initialMessages,
-    onFinish: (msg) => {
-      onBriefStateUpdate();
-      if (!voiceModeRef.current) return;
-      // Extract text from the finished assistant message.
-      const text = (msg as { parts?: { type: string; text?: string }[] }).parts
-        ?.filter((p) => p.type === "text")
-        .map((p) => p.text ?? "")
-        .join("") ?? "";
-      speak(text, () => {
-        if (voiceModeRef.current) speechStart();
-      });
-    },
+    onFinish: () => { onBriefStateUpdate(); },
   });
 
   const isStreaming = status === "streaming" || status === "submitted";
+  const lastSpokenIdRef = useRef<string | null>(null);
 
   // Keep ref in sync so callbacks always see current value.
   useEffect(() => { voiceModeRef.current = voiceMode; }, [voiceMode]);
+
+  // When streaming ends in voice mode, read the last assistant message aloud.
+  useEffect(() => {
+    if (isStreaming || !voiceMode) return;
+    const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+    if (!lastAssistant || lastAssistant.id === lastSpokenIdRef.current) return;
+    lastSpokenIdRef.current = lastAssistant.id;
+    const text = lastAssistant.parts
+      ?.filter((p) => p.type === "text")
+      .map((p) => (p.type === "text" ? p.text : ""))
+      .join("") ?? "";
+    if (text) speak(text, () => { if (voiceModeRef.current) speechStart(); });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isStreaming, voiceMode]);
 
   const { state: speechState, toggle: toggleSpeech, start: speechStart } = useSpeechRecognition({
     onResult: (transcript) => {
