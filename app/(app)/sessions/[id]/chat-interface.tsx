@@ -390,9 +390,6 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
               fontFamily: "var(--font-sans)",
             }}
           />
-          {speechState !== "unavailable" && (
-            <MicButton state={speechState} onClick={toggleSpeech} disabled={isStreaming} />
-          )}
           <SendButton onClick={submit} disabled={!input.trim() || isStreaming} />
         </div>
         <p
@@ -404,7 +401,7 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
             letterSpacing: "0.02em",
           }}
         >
-          Enter for å sende · Shift+Enter for ny linje{speechState !== "unavailable" ? " · Mikrofon for tale" : ""}
+          Enter for å sende · Shift+Enter for ny linje
         </p>
       </div>
     </>
@@ -475,36 +472,6 @@ function MessageBubble({ role, text }: { role: "user" | "assistant"; text: strin
   );
 }
 
-function MicButton({ state, onClick, disabled }: { state: "idle" | "listening"; onClick: () => void; disabled: boolean }) {
-  const isListening = state === "listening";
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      title={isListening ? "Stopp opptak" : "Tal inn svar"}
-      style={{
-        width: "36px",
-        height: "36px",
-        borderRadius: "8px",
-        border: isListening ? "1px solid rgba(212,175,55,0.4)" : "1px solid var(--border-subtle)",
-        flexShrink: 0,
-        cursor: disabled ? "default" : "pointer",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: isListening ? "rgba(212,175,55,0.12)" : "transparent",
-        transition: "background 180ms ease, border-color 180ms ease",
-        animation: isListening ? "pulse 1.4s ease-in-out infinite" : "none",
-      }}
-    >
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke={isListening ? "var(--accent-primary)" : "var(--text-muted)"} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="4.5" y="1" width="5" height="8" rx="2.5" />
-        <path d="M2 7.5a5 5 0 0 0 10 0" />
-        <line x1="7" y1="12.5" x2="7" y2="11" />
-      </svg>
-    </button>
-  );
-}
 
 function SendButton({ onClick, disabled }: { onClick: () => void; disabled: boolean }) {
   const [hovered, setHovered] = useState(false);
