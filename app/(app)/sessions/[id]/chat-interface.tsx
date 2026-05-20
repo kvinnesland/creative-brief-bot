@@ -22,42 +22,102 @@ interface Props {
 
 export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, initialMessages, backHref }: Props) {
   const [input, setInput] = useState("");
+  const [voiceMode, setVoiceMode] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const voiceModeRef = useRef(false);
+  const pendingSubmitRef = useRef("");
 
   const transport = useMemo(
     () => new DefaultChatTransport({ api: "/api/chat", body: { sessionId } }),
     [sessionId]
   );
 
+  // Speak text via SpeechSynthesis, then call onDone.
+  function speak(text: string, onDone: () => void) {
+    if (typeof window === "undefined" || !window.speechSynthesis) { onDone(); return; }
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = "nb-NO";
+    // Prefer a Norwegian voice if available.
+    const voices = window.speechSynthesis.getVoices();
+    const nbVoice = voices.find((v) => v.lang.startsWith("nb") || v.lang.startsWith("no"));
+    if (nbVoice) utt.voice = nbVoice;
+    utt.rate = 1.05;
+    utt.onend = onDone;
+    utt.onerror = onDone;
+    window.speechSynthesis.speak(utt);
+  }
+
   const { messages, status, sendMessage } = useChat({
     transport,
     messages: initialMessages,
-    onFinish: () => { onBriefStateUpdate(); },
+    onFinish: (msg) => {
+      onBriefStateUpdate();
+      if (!voiceModeRef.current) return;
+      // Extract text from the finished assistant message.
+      const text = (msg as { parts?: { type: string; text?: string }[] }).parts
+        ?.filter((p) => p.type === "text")
+        .map((p) => p.text ?? "")
+        .join("") ?? "";
+      speak(text, () => {
+        if (voiceModeRef.current) speechStart();
+      });
+    },
   });
 
   const isStreaming = status === "streaming" || status === "submitted";
 
-  const { state: speechState, toggle: toggleSpeech } = useSpeechRecognition({
+  // Keep ref in sync so callbacks always see current value.
+  useEffect(() => { voiceModeRef.current = voiceMode; }, [voiceMode]);
+
+  const { state: speechState, toggle: toggleSpeech, start: speechStart } = useSpeechRecognition({
     onResult: (transcript) => {
-      setInput((prev) => (prev ? prev + " " + transcript : transcript));
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "auto";
-        textareaRef.current.style.height =
-          Math.min(textareaRef.current.scrollHeight, 120) + "px";
+      if (voiceModeRef.current) {
+        // In voice mode: auto-send immediately.
+        pendingSubmitRef.current = transcript;
+        setInput(transcript);
+      } else {
+        setInput((prev) => (prev ? prev + " " + transcript : transcript));
+        if (textareaRef.current) {
+          textareaRef.current.style.height = "auto";
+          textareaRef.current.style.height =
+            Math.min(textareaRef.current.scrollHeight, 120) + "px";
+        }
+      }
+    },
+    onEnd: () => {
+      if (voiceModeRef.current && pendingSubmitRef.current.trim()) {
+        const text = pendingSubmitRef.current;
+        pendingSubmitRef.current = "";
+        setInput("");
+        sendMessage({ text });
       }
     },
   });
+
+  function toggleVoiceMode() {
+    const next = !voiceMode;
+    setVoiceMode(next);
+    voiceModeRef.current = next;
+    if (next) {
+      window.speechSynthesis?.cancel();
+      speechStart();
+    } else {
+      window.speechSynthesis?.cancel();
+      if (speechState === "listening") toggleSpeech();
+    }
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   useEffect(() => {
-    if (!isStreaming) {
+    if (!isStreaming && !voiceMode) {
       textareaRef.current?.focus();
     }
-  }, [isStreaming]);
+  }, [isStreaming, voiceMode]);
 
   function submit() {
     if (!input.trim() || isStreaming) return;
@@ -109,30 +169,58 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
           </Link>
         )}
         <div style={{ flex: 1 }}>
-        <h1
-          style={{
-            fontFamily: "var(--font-serif)",
-            fontSize: "20px",
-            fontWeight: 500,
-            letterSpacing: "-0.02em",
-            color: "var(--text-primary)",
-            lineHeight: 1.2,
-          }}
-        >
-          {initialTitle ?? "Ny brief"}
-        </h1>
-        <p
-          style={{
-            fontSize: "12px",
-            marginTop: "4px",
-            color: isStreaming ? "var(--accent-primary)" : "var(--text-muted)",
-            letterSpacing: "0.01em",
-            transition: "color 300ms ease",
-          }}
-        >
-          {isStreaming ? "Tenker…" : "Pågår"}
-        </p>
+          <h1
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: "20px",
+              fontWeight: 500,
+              letterSpacing: "-0.02em",
+              color: "var(--text-primary)",
+              lineHeight: 1.2,
+            }}
+          >
+            {initialTitle ?? "Ny brief"}
+          </h1>
+          <p
+            style={{
+              fontSize: "12px",
+              marginTop: "4px",
+              color: isStreaming ? "var(--accent-primary)" : "var(--text-muted)",
+              letterSpacing: "0.01em",
+              transition: "color 300ms ease",
+            }}
+          >
+            {isStreaming ? "Tenker…" : "Pågår"}
+          </p>
         </div>
+        {speechState !== "unavailable" && (
+          <button
+            onClick={toggleVoiceMode}
+            title={voiceMode ? "Avslutt stemmesamtale" : "Start stemmesamtale"}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "6px 12px",
+              borderRadius: "20px",
+              border: voiceMode ? "1px solid rgba(212,175,55,0.5)" : "1px solid var(--border-subtle)",
+              background: voiceMode ? "rgba(212,175,55,0.1)" : "transparent",
+              color: voiceMode ? "var(--accent-primary)" : "var(--text-muted)",
+              fontSize: "12px",
+              cursor: "pointer",
+              letterSpacing: "0.02em",
+              transition: "all 180ms ease",
+              flexShrink: 0,
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="4.5" y="1" width="5" height="8" rx="2.5" />
+              <path d="M2 7.5a5 5 0 0 0 10 0" />
+              <line x1="7" y1="12.5" x2="7" y2="11" />
+            </svg>
+            {voiceMode ? "Stemme på" : "Stemme"}
+          </button>
+        )}
       </div>
 
       {/* Message thread */}
@@ -205,6 +293,35 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
         )}
         <div ref={bottomRef} />
       </div>
+
+      {/* Voice mode status bar */}
+      {voiceMode && (
+        <div
+          style={{
+            padding: "8px 20px",
+            borderTop: "1px solid var(--border-subtle)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+            background: "rgba(212,175,55,0.04)",
+            flexShrink: 0,
+          }}
+        >
+          <div
+            style={{
+              width: "8px",
+              height: "8px",
+              borderRadius: "50%",
+              background: speechState === "listening" ? "var(--accent-primary)" : "var(--text-muted)",
+              animation: speechState === "listening" ? "pulse 1.4s ease-in-out infinite" : "none",
+            }}
+          />
+          <span style={{ fontSize: "12px", color: "var(--text-muted)", letterSpacing: "0.02em" }}>
+            {isStreaming ? "Tenker…" : speechState === "listening" ? "Lytter…" : "Venter…"}
+          </span>
+        </div>
+      )}
 
       {/* Input area */}
       <div

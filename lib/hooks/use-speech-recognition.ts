@@ -31,10 +31,11 @@ interface SpeechWindow {
 
 interface UseSpeechRecognitionOptions {
   onResult: (transcript: string) => void;
+  onEnd?: () => void;
   lang?: string;
 }
 
-export function useSpeechRecognition({ onResult, lang = "nb-NO" }: UseSpeechRecognitionOptions) {
+export function useSpeechRecognition({ onResult, onEnd, lang = "nb-NO" }: UseSpeechRecognitionOptions) {
   const [state, setState] = useState<SpeechState>("idle");
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
@@ -60,6 +61,7 @@ export function useSpeechRecognition({ onResult, lang = "nb-NO" }: UseSpeechReco
 
     recognition.onend = () => {
       setState((prev) => (prev === "listening" ? "idle" : prev));
+      onEnd?.();
     };
 
     recognition.onerror = () => {
@@ -86,5 +88,5 @@ export function useSpeechRecognition({ onResult, lang = "nb-NO" }: UseSpeechReco
     else start();
   }, [state, start, stop]);
 
-  return { state, toggle };
+  return { state, toggle, start };
 }
