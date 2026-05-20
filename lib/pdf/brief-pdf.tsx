@@ -150,11 +150,15 @@ export function BriefDocument({ title, briefState, generatedDate }: Props) {
   const hasConstraints = constraints.length > 0;
 
   const textSections: { label: string; value: string | null }[] = [
-    { label: "Business Goal",    value: briefState.business_goal },
-    { label: "Target Audience",  value: briefState.target_audience },
-    { label: "Core Message",     value: briefState.core_message },
-    { label: "Tone of Voice",    value: briefState.tone_of_voice },
-    { label: "Visual Direction", value: briefState.visual_direction },
+    { label: "Bakgrunn og kontekst",        value: briefState.background },
+    { label: "Kommunikasjonsbarrieren",     value: briefState.problem_statement },
+    { label: "Forretningsmål",              value: briefState.business_goal },
+    { label: "Kommunikasjonsmål",           value: briefState.communication_goal },
+    { label: "Målgruppe",                   value: briefState.target_audience },
+    { label: "Innsikt",                     value: briefState.insight },
+    { label: "Hovedbudskap",               value: briefState.core_message },
+    { label: "Sannhetsbevis (RTB)",         value: briefState.reasons_to_believe },
+    { label: "Tone of voice og stil",       value: briefState.tone_of_voice },
   ];
 
   const lastSectionIndex =
@@ -190,7 +194,7 @@ export function BriefDocument({ title, briefState, generatedDate }: Props) {
               {value ? (
                 <Text style={s.sectionValue}>{value}</Text>
               ) : (
-                <Text style={s.sectionEmpty}>Not yet defined</Text>
+                <Text style={s.sectionEmpty}>Ikke definert ennå</Text>
               )}
             </View>
           );
@@ -199,7 +203,7 @@ export function BriefDocument({ title, briefState, generatedDate }: Props) {
         {/* Deliverables */}
         {hasDeliverables && (
           <View style={hasConstraints ? s.section : s.sectionLast}>
-            <Text style={s.sectionLabel}>Deliverables</Text>
+            <Text style={s.sectionLabel}>Leveranser og kanaler</Text>
             {deliverables.map((item, i) => (
               <View key={i} style={s.listItem}>
                 <Text style={s.listBullet}>—</Text>
@@ -212,7 +216,7 @@ export function BriefDocument({ title, briefState, generatedDate }: Props) {
         {/* Constraints */}
         {hasConstraints && (
           <View style={s.sectionLast}>
-            <Text style={s.sectionLabel}>Constraints & Budget</Text>
+            <Text style={s.sectionLabel}>Rammer og begrensninger</Text>
             {constraints.map((item, i) => (
               <View key={i} style={s.listItem}>
                 <Text style={s.listBullet}>—</Text>

@@ -46,13 +46,17 @@ describe("BriefDocument", () => {
       <BriefDocument
         title="Full Brief"
         briefState={makeBriefState({
-          business_goal: "Increase brand awareness",
-          target_audience: "18–35 urban creatives",
-          core_message: "Creativity without limits",
-          tone_of_voice: "Bold and playful",
-          visual_direction: "Clean and minimal",
-          deliverables: ["Social media campaign", "Brand guide"],
-          constraints: ["Budget: $10,000", "4-week timeline"],
+          background: "Fjordkraft er en norsk strømleverandør.",
+          problem_statement: "Kundene oppfatter alle leverandører som like og velger på pris.",
+          business_goal: "10% nye kunder innen Q4",
+          communication_goal: "Målgruppen skal se Fjordkraft som det åpenbare valget.",
+          target_audience: "Småbarnsfamilier, 30–45 år, opptatt av bærekraft",
+          insight: "De vil ta det riktige valget, men beslutningstrøtthet vinner.",
+          core_message: "Fjordkraft — kraften til å velge riktig",
+          reasons_to_believe: "100% norsk vannkraft, lokal kundeservice",
+          tone_of_voice: "Varm, tydelig, ikke belærende",
+          deliverables: ["TV-kampanje", "Digitale annonser"],
+          constraints: ["Budsjett: 5 MNOK", "Lansering september"],
         })}
         generatedDate="20 May 2026"
       />
