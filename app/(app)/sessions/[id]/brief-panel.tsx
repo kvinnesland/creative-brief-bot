@@ -224,7 +224,7 @@ export function BriefPanel({ sessionId, briefState }: Props) {
           onClick={handleShare}
           disabled={!canExport || sharing}
         >
-          {copied ? "Kopiert!" : sharing ? "Deler…" : "Del"}
+          {copied ? "Kopiert!" : sharing ? "Deler…" : "Del med kollega"}
         </OutlineButton>
         <PrimaryButton
           onClick={handleExport}
