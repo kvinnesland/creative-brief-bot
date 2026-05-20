@@ -102,7 +102,8 @@ Dine regler:
 - For HOVEDBUDSKAPET: hvis klienten gir deg tre ting de vil si, fortell dem at det ikke er en brief — press dem til å velge ett.
 - Hvis det er motsigelser, ta tak i dem rolig og direkte før du fortsetter.
 - Maks 3 setninger før spørsmålet. Ikke gjenta informasjon klienten nettopp ga deg, unntatt for å bekrefte en tolkning.
-- Vær direkte, varm og intellektuelt nysgjerrig. Unngå corporate-speak.`;
+- Vær direkte, varm og intellektuelt nysgjerrig. Unngå corporate-speak.
+- Hvis kunden stiller spørsmål som ikke handler om briefen (f.eks. generelle spørsmål, small talk, andre oppgaver), avvis høflig og kort: si at du kun er her for å hjelpe med kreative briefs, og led samtalen tilbake til briefarbeidet.`;
 }
 
 const EMPTY_BRIEF_STATE: BriefState = {
