@@ -88,7 +88,8 @@ Rules:
   - 0.5–0.65 = mentioned clearly but needs more depth to be brief-ready
   - below 0.5 = too vague, implied, or single-word — do not extract
 - A single sentence or short statement should never score above 0.65, even if it's clear.
-- open_questions: any unresolved questions that surfaced in the conversation.`;
+- open_questions: any unresolved questions that surfaced in the conversation.
+- Always write extracted field values in Norwegian (bokmål), matching the language the user writes in. Do not translate or paraphrase into English.`;
 
   const { object } = await generateObject({
     model: ANALYSIS_MODEL,
