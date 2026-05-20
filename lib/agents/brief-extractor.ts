@@ -82,7 +82,12 @@ ${JSON.stringify({
 ${urlSection}
 Rules:
 - Only extract information explicitly stated in the conversation or URL content. Do not infer.
-- Confidence: 0.9+ = clearly stated; 0.7–0.9 = reasonably clear; 0.5–0.7 = implied; below 0.5 = do not extract.
+- Confidence scale (be conservative — most first mentions should score 0.5–0.65):
+  - 0.85–1.0 = rich, strategic-level detail with clear rationale (rare — requires multiple turns of elaboration)
+  - 0.65–0.85 = solid coverage with meaningful context, not just one sentence
+  - 0.5–0.65 = mentioned clearly but needs more depth to be brief-ready
+  - below 0.5 = too vague, implied, or single-word — do not extract
+- A single sentence or short statement should never score above 0.65, even if it's clear.
 - open_questions: any unresolved questions that surfaced in the conversation.`;
 
   const { object } = await generateObject({
