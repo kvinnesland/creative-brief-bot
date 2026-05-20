@@ -6,7 +6,7 @@ import { ChatInterface } from "./chat-interface";
 import { BriefPanel } from "./brief-panel";
 import type { BriefState, BriefSession } from "@/lib/types/entities";
 import { useWindowWidth } from "@/lib/hooks/use-window-width";
-import { calcProgress } from "@/lib/utils/brief-progress";
+import { calcCompletionPct } from "@/lib/utils/brief-progress";
 import Link from "next/link";
 
 interface UIMessage {
@@ -44,7 +44,7 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
     }
   }, [session.id]);
 
-  const progress = calcProgress(briefState);
+  const progress = calcCompletionPct(briefState);
 
   if (isMobile) {
     return (

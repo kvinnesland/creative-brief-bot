@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { BriefState } from "@/lib/types/entities";
+import { calcCompletionPct } from "@/lib/utils/brief-progress";
 
 interface Props {
   sessionId: string;
@@ -26,13 +27,8 @@ export function BriefPanel({ sessionId, briefState }: Props) {
   const constraints = briefState?.constraints ?? [];
   const openQuestions = briefState?.open_questions ?? [];
 
-  const totalFilled =
-    SECTIONS.filter(({ key }) => briefState?.[key] != null).length +
-    (deliverables.length > 0 ? 1 : 0) +
-    (constraints.length > 0 ? 1 : 0);
-
-  const completionPct = Math.round((totalFilled / 7) * 100);
-  const canExport = totalFilled > 0;
+  const completionPct = calcCompletionPct(briefState);
+  const canExport = completionPct > 0;
 
   async function handleShare() {
     if (!canExport || sharing) return;
