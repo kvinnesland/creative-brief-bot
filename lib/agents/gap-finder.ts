@@ -1,14 +1,17 @@
-// CR-002: Gap Finder — pure function, no AI call.
-// Returns a list of required BriefState fields that are unfilled.
+// Pure function — no AI call. Returns required brief fields that are unfilled.
 
 import type { BriefState, BriefStateField } from "@/lib/types/entities";
 
 const REQUIRED_FIELDS: BriefStateField[] = [
+  "background",
+  "problem_statement",
   "business_goal",
+  "communication_goal",
   "target_audience",
+  "insight",
   "core_message",
+  "reasons_to_believe",
   "tone_of_voice",
-  "visual_direction",
   "deliverables",
   "constraints",
 ];

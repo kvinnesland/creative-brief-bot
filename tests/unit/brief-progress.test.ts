@@ -6,9 +6,14 @@ function makeState(scores: Record<string, number> | null): BriefState {
   return {
     id: "test",
     session_id: "session",
+    background: null,
+    problem_statement: null,
     business_goal: null,
+    communication_goal: null,
     target_audience: null,
+    insight: null,
     core_message: null,
+    reasons_to_believe: null,
     tone_of_voice: null,
     visual_direction: null,
     deliverables: null,
@@ -23,9 +28,14 @@ function makeFullState(overrides: Partial<BriefState> = {}): BriefState {
   return {
     id: "test",
     session_id: "session",
+    background: null,
+    problem_statement: null,
     business_goal: null,
+    communication_goal: null,
     target_audience: null,
+    insight: null,
     core_message: null,
+    reasons_to_believe: null,
     tone_of_voice: null,
     visual_direction: null,
     deliverables: null,
@@ -73,29 +83,33 @@ describe("calcCompletionPct", () => {
     expect(calcCompletionPct(makeFullState())).toBe(0);
   });
 
-  it("counts each filled section as 1/7", () => {
-    expect(calcCompletionPct(makeFullState({ business_goal: "grow" }))).toBe(Math.round(1 / 7 * 100));
+  it("counts each filled section as 1/11", () => {
+    expect(calcCompletionPct(makeFullState({ business_goal: "grow" }))).toBe(Math.round(1 / 11 * 100));
   });
 
   it("counts deliverables list as 1 slot", () => {
-    expect(calcCompletionPct(makeFullState({ deliverables: ["a", "b"] }))).toBe(Math.round(1 / 7 * 100));
+    expect(calcCompletionPct(makeFullState({ deliverables: ["a", "b"] }))).toBe(Math.round(1 / 11 * 100));
   });
 
   it("counts constraints list as 1 slot", () => {
-    expect(calcCompletionPct(makeFullState({ constraints: ["no blue"] }))).toBe(Math.round(1 / 7 * 100));
+    expect(calcCompletionPct(makeFullState({ constraints: ["no blue"] }))).toBe(Math.round(1 / 11 * 100));
   });
 
   it("does not count empty arrays as filled", () => {
     expect(calcCompletionPct(makeFullState({ deliverables: [], constraints: [] }))).toBe(0);
   });
 
-  it("returns 100 when all 7 slots are filled", () => {
+  it("returns 100 when all 11 slots are filled", () => {
     expect(calcCompletionPct(makeFullState({
+      background: "b",
+      problem_statement: "p",
       business_goal: "g",
+      communication_goal: "cg",
       target_audience: "t",
+      insight: "i",
       core_message: "c",
+      reasons_to_believe: "r",
       tone_of_voice: "v",
-      visual_direction: "vis",
       deliverables: ["d"],
       constraints: ["con"],
     }))).toBe(100);

@@ -1,5 +1,3 @@
-// CR-002: Unit tests for gap-finder.
-
 import { describe, it, expect } from "vitest";
 import { findGaps } from "@/lib/agents/gap-finder";
 import type { BriefState } from "@/lib/types/entities";
@@ -8,9 +6,14 @@ function makeState(overrides: Partial<BriefState> = {}): BriefState {
   return {
     id: "test-id",
     session_id: "session-id",
+    background: null,
+    problem_statement: null,
     business_goal: null,
+    communication_goal: null,
     target_audience: null,
+    insight: null,
     core_message: null,
+    reasons_to_believe: null,
     tone_of_voice: null,
     visual_direction: null,
     deliverables: null,
@@ -22,24 +25,28 @@ function makeState(overrides: Partial<BriefState> = {}): BriefState {
   };
 }
 
+const ALL_FILLED: Partial<BriefState> = {
+  background: "Fjellreven er kjent for ekspedisjonsutstyr",
+  problem_statement: "Oppfattes som for tungt for hverdagsturer",
+  business_goal: "Øke salg av hverdagsbekledning med 15 %",
+  communication_goal: "Flytte oppfatning fra ekspedisjonsmerke til hverdagsmerke",
+  target_audience: "Urbane småbarnsforeldre som ønsker mer tid ute",
+  insight: "Folk vil ut, men logistikken og dørstokkmila vinner",
+  core_message: "Naturen starter der asfalten slutter",
+  reasons_to_believe: "Vardag-serien — lett, fleksibel, like slitesterk",
+  tone_of_voice: "Inspirerende, ujålete og inviterende",
+  deliverables: ["Sosiale medier (video)", "OOH nær kollektivknutepunkter"],
+  constraints: ["Budsjett: 2M NOK", "Logo + slagordet 'Forever Nature' obligatorisk"],
+};
+
 describe("findGaps", () => {
-  it("returns all required fields when brief is empty", () => {
+  it("returns all 11 required fields when brief is empty", () => {
     const gaps = findGaps(makeState());
-    expect(gaps).toHaveLength(7);
+    expect(gaps).toHaveLength(11);
   });
 
   it("returns no gaps when all fields are filled", () => {
-    const gaps = findGaps(
-      makeState({
-        business_goal: "Increase brand awareness",
-        target_audience: "18–35 urban creatives",
-        core_message: "Creativity without limits",
-        tone_of_voice: "Bold and playful",
-        visual_direction: "Clean and minimal",
-        deliverables: ["Social media campaign"],
-        constraints: ["Budget: $10,000"],
-      })
-    );
+    const gaps = findGaps(makeState(ALL_FILLED));
     expect(gaps).toHaveLength(0);
   });
 
@@ -55,15 +62,21 @@ describe("findGaps", () => {
   });
 
   it("returns only the missing fields", () => {
-    const gaps = findGaps(
-      makeState({
-        business_goal: "Launch a new product",
-        target_audience: "Tech enthusiasts",
-      })
-    );
+    const gaps = findGaps(makeState({
+      background: "Kontekst satt",
+      business_goal: "Øke salg",
+      target_audience: "Urbane yrkesaktive",
+    }));
+    expect(gaps).not.toContain("background");
     expect(gaps).not.toContain("business_goal");
     expect(gaps).not.toContain("target_audience");
+    expect(gaps).toContain("problem_statement");
+    expect(gaps).toContain("insight");
     expect(gaps).toContain("core_message");
-    expect(gaps).toContain("tone_of_voice");
+  });
+
+  it("visual_direction is not a required field", () => {
+    const gaps = findGaps(makeState(ALL_FILLED));
+    expect(gaps).not.toContain("visual_direction");
   });
 });

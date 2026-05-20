@@ -10,11 +10,15 @@ interface Props {
 }
 
 const SECTIONS: { label: string; key: keyof BriefState }[] = [
-  { label: "Forretningsmål",  key: "business_goal" },
-  { label: "Målgruppe",       key: "target_audience" },
-  { label: "Kjernebudskap",   key: "core_message" },
-  { label: "Tone of voice",   key: "tone_of_voice" },
-  { label: "Visuell retning", key: "visual_direction" },
+  { label: "Bakgrunn og kontekst",    key: "background" },
+  { label: "Problemet som skal løses", key: "problem_statement" },
+  { label: "Forretningsmål",          key: "business_goal" },
+  { label: "Kommunikasjonsmål",       key: "communication_goal" },
+  { label: "Målgruppe",               key: "target_audience" },
+  { label: "Innsikt",                 key: "insight" },
+  { label: "Hovedbudskap",            key: "core_message" },
+  { label: "Sannhetsbevis",           key: "reasons_to_believe" },
+  { label: "Tone of voice",           key: "tone_of_voice" },
 ];
 
 export function BriefPanel({ sessionId, briefState }: Props) {

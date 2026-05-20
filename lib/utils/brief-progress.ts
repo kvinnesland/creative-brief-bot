@@ -1,11 +1,15 @@
 import type { BriefState } from "@/lib/types/entities";
 
 const BRIEF_SECTION_KEYS: (keyof BriefState)[] = [
+  "background",
+  "problem_statement",
   "business_goal",
+  "communication_goal",
   "target_audience",
+  "insight",
   "core_message",
+  "reasons_to_believe",
   "tone_of_voice",
-  "visual_direction",
 ];
 
 export function calcProgress(briefState: BriefState | null): number {
@@ -16,12 +20,12 @@ export function calcProgress(briefState: BriefState | null): number {
   return Math.round(avg * 100);
 }
 
-// Section-fill completion: counts non-null sections + non-empty lists out of 7.
+// Section-fill completion: counts non-null sections + non-empty lists out of 11.
 // Used to keep the mobile tab bar and BriefPanel header in sync.
 export function calcCompletionPct(briefState: BriefState | null): number {
   if (!briefState) return 0;
   const filled = BRIEF_SECTION_KEYS.filter((k) => briefState[k] != null).length
     + ((briefState.deliverables ?? []).length > 0 ? 1 : 0)
     + ((briefState.constraints ?? []).length > 0 ? 1 : 0);
-  return Math.round((filled / 7) * 100);
+  return Math.round((filled / 11) * 100);
 }

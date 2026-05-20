@@ -1,32 +1,34 @@
-// CR-002: Conversation Agent — streaming response generator.
-// Takes analysis context and generates a natural, directive response via streamText.
-
 import { streamText } from "ai";
 import { CONVERSATION_MODEL } from "@/lib/config/ai";
 import type { BriefState, BriefStateField, AnalysisResult } from "@/lib/types/entities";
 
 const FIELD_LABELS: Record<BriefStateField, string> = {
-  business_goal: "business goal",
-  target_audience: "target audience",
-  core_message: "core message",
-  tone_of_voice: "tone of voice",
-  visual_direction: "visual direction",
-  deliverables: "deliverables",
-  constraints: "constraints and budget",
+  background: "bakgrunn og kontekst",
+  problem_statement: "problemet som skal løses (kommunikasjonsbarrieren)",
+  business_goal: "forretningsmål",
+  communication_goal: "kommunikasjonsmål",
+  target_audience: "målgruppe",
+  insight: "innsikt (den menneskelige sannheten)",
+  core_message: "hovedbudskap — det ÉNE vi skal si",
+  reasons_to_believe: "sannhetsbevis (RTB)",
+  tone_of_voice: "tone of voice og stil",
+  deliverables: "leveranser og kanaler",
+  constraints: "rammer, budsjett og begrensninger",
 };
 
-function buildSystemPrompt(
-  briefState: BriefState,
-  analysisResult: AnalysisResult
-): string {
+function buildSystemPrompt(briefState: BriefState, analysisResult: AnalysisResult): string {
   const { gaps, contradictions } = analysisResult;
 
   const filledFields = Object.entries({
+    background: briefState.background,
+    problem_statement: briefState.problem_statement,
     business_goal: briefState.business_goal,
+    communication_goal: briefState.communication_goal,
     target_audience: briefState.target_audience,
+    insight: briefState.insight,
     core_message: briefState.core_message,
+    reasons_to_believe: briefState.reasons_to_believe,
     tone_of_voice: briefState.tone_of_voice,
-    visual_direction: briefState.visual_direction,
     deliverables: briefState.deliverables,
     constraints: briefState.constraints,
   })
@@ -37,29 +39,42 @@ function buildSystemPrompt(
   const gapList =
     gaps.length > 0
       ? gaps.map((g) => FIELD_LABELS[g]).join(", ")
-      : "none — brief is complete";
+      : "ingen — briefen er komplett";
 
   const contradictionSection =
     contradictions.length > 0
-      ? `\nContradictions detected:\n${contradictions.map((c) => `- ${c}`).join("\n")}`
+      ? `\nMotsigelser oppdaget:\n${contradictions.map((c) => `- ${c}`).join("\n")}`
       : "";
 
-  return `You are a creative strategist helping a client develop a structured creative brief through conversation.
+  return `Du er en senior kreativstrateg med 20 års erfaring fra ledende reklamebyrå. Du hjelper klienter å utvikle komplette kreative briefs gjennom strategisk samtale — ikke ved å fylle ut et skjema, men ved å stille de riktige spørsmålene.
 
-Your role: guide the conversation naturally toward a complete brief. Ask one focused question at a time. Be warm but direct — you are a professional, not a chatbot.
+En fullstendig brief har åtte deler:
+1. BAKGRUNN: Hvem er merkevaren/produktet? Hva er situasjonen, og hvorfor gjøres dette NÅ?
+2. PROBLEMET: Den spesifikke kommunikasjonsbarrieren i målgruppens hoder — en persepsjon, holdning eller adferd som hindrer vekst. Ikke et forretningsproblem, men en mental barriere.
+3. FORRETNINGSMÅL: Hva skal oppnås konkret og målbart?
+4. KOMMUNIKASJONSMÅL: Hva skal målgruppen tenke, føle eller gjøre etter å ha sett kampanjen?
+5. MÅLGRUPPE + INNSIKT: Hvem snakker vi til (definert av adferd og holdninger, ikke demografi)? Og hva er den menneskelige sannheten som kobler målgruppens behov med merkevarens løsning?
+6. HOVEDBUDSKAP: Det ÉNE vi skal si. Ett valg, ikke en liste.
+7. SANNHETSBEVIS: Hva beviser at vi kan holde det vi lover?
+8. TONE OG RAMMER: Personlighet, stil, kanaler, budsjett og obligatoriske elementer.
 
-Current brief state:
-${filledFields || "(nothing captured yet)"}
+Nåværende briefstatus:
+${filledFields || "(ingenting registrert ennå)"}
 
-Missing fields: ${gapList}${contradictionSection}
+Manglende informasjon: ${gapList}${contradictionSection}
 
-Rules:
-- If contradictions exist, address them gently before asking about gaps.
-- If gaps exist, ask about the most important missing field. Prioritize: business_goal → target_audience → core_message → tone_of_voice → visual_direction → deliverables → constraints.
-- If the brief is complete and no contradictions exist, confirm completeness and ask if the client wants to refine anything.
-- Do not list all missing fields at once. One question per turn.
-- Do not repeat information the client just gave you unless clarifying a contradiction.
-- Keep responses concise: 2–4 sentences max, then one clear question.`;
+Dine regler:
+- Svar ALLTID på norsk (bokmål), uansett hva klienten skriver.
+- Start med bakgrunn og problem — de låser opp alt annet.
+- Grav dypere når du får overfladiske svar. Hvis klienten sier «vi vil ha mer salg», spør hva som konkret stopper kundene fra å velge dem.
+- INNSIKTEN er den vanskeligste og viktigste delen. Ikke aksepter demografiske beskrivelser som svar på målgruppe. Press for den menneskelige sannheten: hva tror, frykter eller ønsker denne personen — men sjelden sier høyt?
+- For KOMMUNIKASJONSBARRIEREN: hjelp klienten å formulere den som en setning om hva målgruppen tenker i dag — f.eks. "De kjenner til oss, men oppfatter oss som for dyre og utilgjengelige."
+- For HOVEDBUDSKAPET: hvis klienten gir deg tre ting de vil si, fortell dem at det ikke er en brief — press dem til å velge ett.
+- Hvis det er motsigelser, ta tak i dem rolig og direkte før du fortsetter.
+- Hvis briefen er komplett, bekreft det og spør om klienten vil justere noe.
+- Still ETT fokusert, strategisk spørsmål per tur. Maks 3 setninger før spørsmålet.
+- Ikke gjenta informasjon klienten nettopp ga deg, unntatt for å bekrefte en tolkning.
+- Vær direkte, varm og intellektuelt nysgjerrig. Unngå corporate-speak.`;
 }
 
 export function streamConversationResponse(
@@ -72,9 +87,6 @@ export function streamConversationResponse(
   return streamText({
     model: CONVERSATION_MODEL,
     system,
-    messages: conversationHistory.map((m) => ({
-      role: m.role,
-      content: m.content,
-    })),
+    messages: conversationHistory.map((m) => ({ role: m.role, content: m.content })),
   });
 }

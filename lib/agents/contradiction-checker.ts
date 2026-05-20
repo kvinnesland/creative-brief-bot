@@ -20,11 +20,15 @@ export async function findContradictions(
   latestUserMessage: string
 ): Promise<string[]> {
   const filledFields = Object.entries({
+    background: briefState.background,
+    problem_statement: briefState.problem_statement,
     business_goal: briefState.business_goal,
+    communication_goal: briefState.communication_goal,
     target_audience: briefState.target_audience,
+    insight: briefState.insight,
     core_message: briefState.core_message,
+    reasons_to_believe: briefState.reasons_to_believe,
     tone_of_voice: briefState.tone_of_voice,
-    visual_direction: briefState.visual_direction,
     deliverables: briefState.deliverables,
     constraints: briefState.constraints,
   }).filter(([, v]) => v !== null);

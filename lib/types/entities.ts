@@ -25,15 +25,22 @@ export interface BriefSession {
 export interface BriefState {
   id: string;
   session_id: string;
+  // 8-section brief framework
+  background: string | null;
+  problem_statement: string | null;
   business_goal: string | null;
+  communication_goal: string | null;
   target_audience: string | null;
+  insight: string | null;
   core_message: string | null;
+  reasons_to_believe: string | null;
   tone_of_voice: string | null;
-  visual_direction: string | null;
   deliverables: string[] | null;
   constraints: string[] | null;
   open_questions: string[] | null;
   confidence_scores: Record<string, number> | null; // section name → 0.0–1.0
+  // kept for backward compatibility with existing sessions
+  visual_direction: string | null;
   updated_at: string;
 }
 
@@ -48,20 +55,28 @@ export interface ConversationMessage {
 // CR-002: Agent pipeline types — not persisted directly; used during per-turn processing.
 
 export type BriefStateField =
+  | "background"
+  | "problem_statement"
   | "business_goal"
+  | "communication_goal"
   | "target_audience"
+  | "insight"
   | "core_message"
+  | "reasons_to_believe"
   | "tone_of_voice"
-  | "visual_direction"
   | "deliverables"
   | "constraints";
 
 export interface BriefStatePatch {
+  background?: string;
+  problem_statement?: string;
   business_goal?: string;
+  communication_goal?: string;
   target_audience?: string;
+  insight?: string;
   core_message?: string;
+  reasons_to_believe?: string;
   tone_of_voice?: string;
-  visual_direction?: string;
   deliverables?: string[];
   constraints?: string[];
   confidence_scores?: Record<string, number>;
