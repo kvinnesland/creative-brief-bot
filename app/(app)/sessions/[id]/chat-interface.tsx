@@ -101,7 +101,7 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
             lineHeight: 1.2,
           }}
         >
-          {initialTitle ?? "New Brief"}
+          {initialTitle ?? "Ny brief"}
         </h1>
         <p
           style={{
