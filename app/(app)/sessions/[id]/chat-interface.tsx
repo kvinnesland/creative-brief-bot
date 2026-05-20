@@ -112,7 +112,13 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
     setVoiceMode(next);
     voiceModeRef.current = next;
     if (next) {
-      window.speechSynthesis?.cancel();
+      // Prime speechSynthesis inside the user gesture so Android Chrome allows
+      // later async calls. A silent utterance unlocks the API for this session.
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        const primer = new SpeechSynthesisUtterance("");
+        primer.volume = 0;
+        window.speechSynthesis.speak(primer);
+      }
       speechStart();
     } else {
       window.speechSynthesis?.cancel();
