@@ -280,7 +280,7 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
               padding: "4px 10px 8px",
             }}
           >
-            Active
+            Aktiv
           </p>
           <div
             style={{
@@ -298,7 +298,7 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
                 lineHeight: 1.4,
               }}
             >
-              {title ?? "Untitled Brief"}
+              {title ?? "Uten tittel"}
             </p>
           </div>
         </nav>
@@ -326,7 +326,7 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <path d="M9 2L4 7l5 5" />
             </svg>
-            All briefs
+            Alle briefer
           </Link>
         </div>
       </aside>

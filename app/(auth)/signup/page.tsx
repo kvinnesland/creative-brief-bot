@@ -27,7 +27,7 @@ export default function SignupPage() {
 
     const json = await res.json();
     if (!res.ok) {
-      setError(json.error ?? "Signup failed. Please try again.");
+      setError(json.error ?? "Registrering mislyktes. Prøv igjen.");
       setLoading(false);
       return;
     }
@@ -81,7 +81,7 @@ export default function SignupPage() {
               color: "var(--text-primary)",
             }}
           >
-            Begin here.
+            Begynn her.
           </h1>
           <p
             style={{
@@ -91,7 +91,7 @@ export default function SignupPage() {
               lineHeight: 1.6,
             }}
           >
-            Create your account to get started.
+            Opprett kontoen din for å komme i gang.
           </p>
         </div>
 
@@ -107,7 +107,7 @@ export default function SignupPage() {
           <form onSubmit={handleSignup} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <AuthInput
               type="email"
-              placeholder="Email address"
+              placeholder="E-postadresse"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               hasError={!!error}
@@ -115,7 +115,7 @@ export default function SignupPage() {
             />
             <AuthInput
               type="password"
-              placeholder="Password (8+ characters)"
+              placeholder="Passord (8+ tegn)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               hasError={!!error}
@@ -130,7 +130,7 @@ export default function SignupPage() {
             )}
 
             <PrimaryButton type="submit" disabled={loading} style={{ marginTop: "4px" }}>
-              {loading ? "Creating account…" : "Create account"}
+              {loading ? "Oppretter konto…" : "Opprett konto"}
             </PrimaryButton>
           </form>
 
@@ -142,12 +142,12 @@ export default function SignupPage() {
           />
 
           <p style={{ fontSize: "13px", color: "var(--text-muted)", textAlign: "center" }}>
-            Already have an account?{" "}
+            Har du allerede en konto?{" "}
             <Link
               href="/login"
               style={{ color: "var(--accent-primary)", textDecoration: "none", fontWeight: 500 }}
             >
-              Sign in
+              Logg inn
             </Link>
           </p>
         </div>

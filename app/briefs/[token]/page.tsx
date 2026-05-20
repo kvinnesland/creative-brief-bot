@@ -27,7 +27,7 @@ export default async function SharedBriefPage({ params }: Props) {
     notFound();
   }
 
-  const generated = new Date(session.updated_at).toLocaleDateString("en-GB", {
+  const generated = new Date(session.updated_at).toLocaleDateString("nb-NO", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -77,7 +77,7 @@ export default async function SharedBriefPage({ params }: Props) {
               letterSpacing: "0.01em",
             }}
           >
-            Generated {generated}
+            Generert {generated}
           </p>
         </div>
 
@@ -90,17 +90,17 @@ export default async function SharedBriefPage({ params }: Props) {
             overflow: "hidden",
           }}
         >
-          <BriefSection label="Business goal"    value={briefState.business_goal}    first />
-          <BriefSection label="Target audience"  value={briefState.target_audience} />
-          <BriefSection label="Core message"     value={briefState.core_message} />
-          <BriefSection label="Tone of voice"    value={briefState.tone_of_voice} />
-          <BriefSection label="Visual direction" value={briefState.visual_direction} />
+          <BriefSection label="Forretningsmål"  value={briefState.business_goal}    first />
+          <BriefSection label="Målgruppe"       value={briefState.target_audience} />
+          <BriefSection label="Kjernebudskap"   value={briefState.core_message} />
+          <BriefSection label="Tone of voice"   value={briefState.tone_of_voice} />
+          <BriefSection label="Visuell retning" value={briefState.visual_direction} />
           {briefState.deliverables && briefState.deliverables.length > 0 && (
-            <ListSection label="Deliverables" items={briefState.deliverables} />
+            <ListSection label="Leveranser" items={briefState.deliverables} />
           )}
           {briefState.constraints && briefState.constraints.length > 0 && (
             <ListSection
-              label="Constraints & budget"
+              label="Begrensninger og budsjett"
               items={briefState.constraints}
               last={!(briefState.deliverables && briefState.deliverables.length > 0)}
             />
@@ -118,7 +118,7 @@ export default async function SharedBriefPage({ params }: Props) {
             opacity: 0.6,
           }}
         >
-          Made with Creative Brief
+          Laget med Creative Brief
         </p>
       </div>
     </div>
@@ -162,7 +162,7 @@ function BriefSection({
           letterSpacing: value ? "-0.01em" : "0",
         }}
       >
-        {value ?? "Not defined"}
+        {value ?? "Ikke definert"}
       </p>
     </div>
   );

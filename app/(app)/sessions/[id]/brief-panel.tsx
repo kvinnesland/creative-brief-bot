@@ -9,11 +9,11 @@ interface Props {
 }
 
 const SECTIONS: { label: string; key: keyof BriefState }[] = [
-  { label: "Business goal",    key: "business_goal" },
-  { label: "Target audience",  key: "target_audience" },
-  { label: "Core message",     key: "core_message" },
-  { label: "Tone of voice",    key: "tone_of_voice" },
-  { label: "Visual direction", key: "visual_direction" },
+  { label: "Forretningsmål",  key: "business_goal" },
+  { label: "Målgruppe",       key: "target_audience" },
+  { label: "Kjernebudskap",   key: "core_message" },
+  { label: "Tone of voice",   key: "tone_of_voice" },
+  { label: "Visuell retning", key: "visual_direction" },
 ];
 
 export function BriefPanel({ sessionId, briefState }: Props) {
@@ -101,7 +101,7 @@ export function BriefPanel({ sessionId, briefState }: Props) {
               color: "var(--text-muted)",
             }}
           >
-            Brief Progress
+            Brief-fremdrift
           </p>
           <span
             style={{
@@ -169,7 +169,7 @@ export function BriefPanel({ sessionId, briefState }: Props) {
 
         {deliverables.length > 0 && (
           <ListSection
-            label="Deliverables"
+            label="Leveranser"
             items={deliverables}
             isLast={constraints.length === 0 && openQuestions.length === 0}
           />
@@ -177,7 +177,7 @@ export function BriefPanel({ sessionId, briefState }: Props) {
 
         {constraints.length > 0 && (
           <ListSection
-            label="Constraints"
+            label="Begrensninger"
             items={constraints}
             isLast={openQuestions.length === 0}
           />
@@ -185,7 +185,7 @@ export function BriefPanel({ sessionId, briefState }: Props) {
 
         {openQuestions.length > 0 && (
           <ListSection
-            label="Open questions"
+            label="Åpne spørsmål"
             items={openQuestions}
             isLast
             accent="warning"
@@ -208,7 +208,7 @@ export function BriefPanel({ sessionId, briefState }: Props) {
                 fontStyle: "italic",
               }}
             >
-              The brief will take shape as your conversation unfolds.
+              Briefen tar form etter hvert som samtalen utfolder seg.
             </p>
           </div>
         )}
@@ -228,13 +228,13 @@ export function BriefPanel({ sessionId, briefState }: Props) {
           onClick={handleShare}
           disabled={!canExport || sharing}
         >
-          {copied ? "Copied!" : sharing ? "Sharing…" : "Share"}
+          {copied ? "Kopiert!" : sharing ? "Deler…" : "Del"}
         </OutlineButton>
         <PrimaryButton
           onClick={handleExport}
           disabled={!canExport || exporting}
         >
-          {exporting ? "Exporting…" : "Export"}
+          {exporting ? "Eksporterer…" : "Eksporter"}
         </PrimaryButton>
       </div>
     </>
@@ -325,7 +325,7 @@ function BriefSection({
           fontStyle: value ? "normal" : "italic",
         }}
       >
-        {value ?? "Not yet defined"}
+        {value ?? "Ikke definert ennå"}
       </p>
     </div>
   );

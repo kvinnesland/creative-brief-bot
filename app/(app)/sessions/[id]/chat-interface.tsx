@@ -112,7 +112,7 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
             transition: "color 300ms ease",
           }}
         >
-          {isStreaming ? "Thinking…" : "In progress"}
+          {isStreaming ? "Tenker…" : "Pågår"}
         </p>
         </div>
       </div>
@@ -159,7 +159,7 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
                 letterSpacing: "-0.01em",
               }}
             >
-              Describe your project to begin.
+              Beskriv prosjektet ditt for å starte.
             </p>
             <p
               style={{
@@ -170,7 +170,7 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
                 marginTop: "10px",
               }}
             >
-              The brief will build itself as the conversation unfolds.
+              Briefen bygger seg opp etter hvert som samtalen utfolder seg.
             </p>
           </div>
         ) : (
@@ -220,7 +220,7 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
                 submit();
               }
             }}
-            placeholder="Describe your project…"
+            placeholder="Beskriv prosjektet ditt…"
             rows={1}
             autoFocus
             disabled={isStreaming}
@@ -249,7 +249,7 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
             letterSpacing: "0.02em",
           }}
         >
-          Enter to send · Shift+Enter for new line
+          Enter for å sende · Shift+Enter for ny linje
         </p>
       </div>
     </>

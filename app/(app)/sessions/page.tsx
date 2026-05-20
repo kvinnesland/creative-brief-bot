@@ -48,7 +48,7 @@ export default async function SessionsPage() {
               letterSpacing: "0.01em",
             }}
           >
-            Sign out
+            Logg ut
           </button>
         </form>
       </nav>
@@ -74,7 +74,7 @@ export default async function SessionsPage() {
                 marginBottom: "8px",
               }}
             >
-              Your workspace
+              Din arbeidsplass
             </p>
             <h1
               style={{
@@ -145,7 +145,7 @@ function EmptyState() {
           letterSpacing: "-0.01em",
         }}
       >
-        No briefs yet
+        Ingen briefer ennå
       </p>
       <p
         style={{
@@ -155,7 +155,7 @@ function EmptyState() {
           lineHeight: 1.6,
         }}
       >
-        Start a conversation to build your first creative brief.
+        Start en samtale for å bygge din første creative brief.
       </p>
       <NewBriefButton />
     </div>

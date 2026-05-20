@@ -87,7 +87,7 @@ export default function LoginPage() {
               color: "var(--text-primary)",
             }}
           >
-            Welcome back.
+            Velkommen tilbake.
           </h1>
           <p
             style={{
@@ -97,7 +97,7 @@ export default function LoginPage() {
               lineHeight: 1.6,
             }}
           >
-            Sign in to continue your work.
+            Logg inn for å fortsette arbeidet ditt.
           </p>
         </div>
 
@@ -114,7 +114,7 @@ export default function LoginPage() {
             <form onSubmit={handlePasswordLogin} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <AuthInput
                 type="email"
-                placeholder="Email address"
+                placeholder="E-postadresse"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 hasError={!!error}
@@ -122,7 +122,7 @@ export default function LoginPage() {
               />
               <AuthInput
                 type="password"
-                placeholder="Password"
+                placeholder="Passord"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 hasError={!!error}
@@ -132,7 +132,7 @@ export default function LoginPage() {
               {error && <ErrorMessage message={error} />}
 
               <PrimaryButton type="submit" disabled={loading} style={{ marginTop: "4px" }}>
-                {loading ? "Signing in…" : "Sign in"}
+                {loading ? "Logger inn…" : "Logg inn"}
               </PrimaryButton>
             </form>
           ) : magicSent ? (
@@ -147,15 +147,15 @@ export default function LoginPage() {
                 lineHeight: 1.6,
               }}
             >
-              <span style={{ color: "var(--accent-primary)", fontWeight: 600 }}>Check your email</span>
-              {" — we sent a sign-in link to "}
+              <span style={{ color: "var(--accent-primary)", fontWeight: 600 }}>Sjekk e-posten din</span>
+              {" — vi sendte en innloggingslenke til "}
               <span style={{ color: "var(--text-primary)" }}>{magicEmail}</span>.
             </div>
           ) : (
             <form onSubmit={handleMagicLink} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <AuthInput
                 type="email"
-                placeholder="Email address"
+                placeholder="E-postadresse"
                 value={magicEmail}
                 onChange={(e) => setMagicEmail(e.target.value)}
                 hasError={!!error}
@@ -165,7 +165,7 @@ export default function LoginPage() {
               {error && <ErrorMessage message={error} />}
 
               <PrimaryButton type="submit" disabled={loading} style={{ marginTop: "4px" }}>
-                {loading ? "Sending…" : "Send magic link"}
+                {loading ? "Sender…" : "Send innloggingslenke"}
               </PrimaryButton>
             </form>
           )}
@@ -187,16 +187,16 @@ export default function LoginPage() {
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
             >
-              {mode === "password" ? "Sign in with magic link instead" : "Sign in with password instead"}
+              {mode === "password" ? "Logg inn med innloggingslenke i stedet" : "Logg inn med passord i stedet"}
             </button>
 
             <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>
-              No account?{" "}
+              Ingen konto?{" "}
               <Link
                 href="/signup"
                 style={{ color: "var(--accent-primary)", textDecoration: "none", fontWeight: 500 }}
               >
-                Sign up
+                Registrer deg
               </Link>
             </p>
           </div>

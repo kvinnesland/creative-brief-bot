@@ -42,7 +42,7 @@ export default function NewBriefButton() {
         boxShadow: hovered && !loading ? "0 0 20px rgba(212,175,55,0.28)" : "none",
       }}
     >
-      {loading ? "Creating…" : "New Brief"}
+      {loading ? "Oppretter…" : "Ny brief"}
     </button>
   );
 }

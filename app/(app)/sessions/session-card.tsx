@@ -7,7 +7,7 @@ import type { BriefSession } from "@/lib/types/entities";
 export function SessionCard({ session }: { session: BriefSession }) {
   const [hovered, setHovered] = useState(false);
 
-  const date = new Date(session.created_at).toLocaleDateString("en-GB", {
+  const date = new Date(session.created_at).toLocaleDateString("nb-NO", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -45,7 +45,7 @@ export function SessionCard({ session }: { session: BriefSession }) {
                 marginBottom: "4px",
               }}
             >
-              {session.title ?? "Untitled Brief"}
+              {session.title ?? "Uten tittel"}
             </p>
             <p
               style={{
@@ -66,9 +66,9 @@ export function SessionCard({ session }: { session: BriefSession }) {
 
 function StatusBadge({ status }: { status: BriefSession["status"] }) {
   const configs: Record<BriefSession["status"], { bg: string; color: string; label: string }> = {
-    in_progress: { bg: "var(--accent-soft)", color: "var(--accent-primary)", label: "In progress" },
-    completed:   { bg: "rgba(39,174,96,0.1)", color: "#4CAF7D", label: "Completed" },
-    archived:    { bg: "rgba(255,255,255,0.04)", color: "var(--text-muted)", label: "Archived" },
+    in_progress: { bg: "var(--accent-soft)", color: "var(--accent-primary)", label: "Pågår" },
+    completed:   { bg: "rgba(39,174,96,0.1)", color: "#4CAF7D", label: "Fullført" },
+    archived:    { bg: "rgba(255,255,255,0.04)", color: "var(--text-muted)", label: "Arkivert" },
   };
   const { bg, color, label } = configs[status];
 
