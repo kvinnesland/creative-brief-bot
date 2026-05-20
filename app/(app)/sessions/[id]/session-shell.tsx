@@ -1,7 +1,8 @@
 "use client";
 // CR-006: Mobile-responsive shell. Desktop: 3-column grid. Mobile (<640px): single-column + bottom tab bar.
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ChatInterface } from "./chat-interface";
 import { BriefPanel } from "./brief-panel";
 import type { BriefState, BriefSession } from "@/lib/types/entities";
@@ -22,11 +23,35 @@ interface Props {
 }
 
 export function SessionShell({ session, initialBriefState, initialMessages }: Props) {
+  const router = useRouter();
   const [briefState, setBriefState] = useState<BriefState | null>(initialBriefState);
   const [title, setTitle] = useState<string | null>(session.title);
   const [activeTab, setActiveTab] = useState<"chat" | "brief">("chat");
+  const [allSessions, setAllSessions] = useState<BriefSession[]>([]);
+  const [creatingBrief, setCreatingBrief] = useState(false);
+  const [hoveredSessionId, setHoveredSessionId] = useState<string | null>(null);
   const width = useWindowWidth();
   const isMobile = width < 640;
+
+  useEffect(() => {
+    fetch("/api/sessions")
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setAllSessions)
+      .catch(() => {});
+  }, [session.id]);
+
+  const createNewBrief = useCallback(async () => {
+    if (creatingBrief) return;
+    setCreatingBrief(true);
+    try {
+      const res = await fetch("/api/sessions", { method: "POST" });
+      if (!res.ok) throw new Error();
+      const newSession = await res.json();
+      router.push(`/sessions/${newSession.id}`);
+    } catch {
+      setCreatingBrief(false);
+    }
+  }, [creatingBrief, router]);
 
   const refreshBriefState = useCallback(async () => {
     try {
@@ -247,29 +272,48 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
           flexDirection: "column",
         }}
       >
-        <div
-          style={{
-            padding: "20px 20px 16px",
-            borderBottom: "1px solid var(--border-subtle)",
-          }}
-        >
-          <Link href="/sessions" style={{ textDecoration: "none" }}>
-            <span
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: "16px",
-                fontWeight: 500,
-                color: "var(--text-primary)",
-                letterSpacing: "-0.01em",
-                display: "block",
-              }}
-            >
-              Creative Brief
-            </span>
-          </Link>
+        {/* Header */}
+        <div style={{ padding: "20px 20px 14px", borderBottom: "1px solid var(--border-subtle)" }}>
+          <span
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: "16px",
+              fontWeight: 500,
+              color: "var(--text-primary)",
+              letterSpacing: "-0.01em",
+              display: "block",
+            }}
+          >
+            Creative Brief
+          </span>
         </div>
 
-        <nav style={{ flex: 1, overflowY: "auto", padding: "12px" }}>
+        {/* Ny brief */}
+        <div style={{ padding: "12px 12px 4px" }}>
+          <button
+            onClick={createNewBrief}
+            disabled={creatingBrief}
+            style={{
+              width: "100%",
+              height: "34px",
+              borderRadius: "999px",
+              border: "1px solid rgba(212,175,55,0.25)",
+              background: "var(--accent-soft)",
+              color: "var(--accent-primary)",
+              fontSize: "12px",
+              fontWeight: 600,
+              letterSpacing: "0.04em",
+              cursor: creatingBrief ? "default" : "pointer",
+              opacity: creatingBrief ? 0.6 : 1,
+              transition: "background 150ms ease",
+            }}
+          >
+            {creatingBrief ? "Oppretter…" : "+ Ny brief"}
+          </button>
+        </div>
+
+        {/* Sessions list */}
+        <nav style={{ flex: 1, overflowY: "auto", padding: "8px 12px 12px" }}>
           <p
             style={{
               fontSize: "10px",
@@ -277,7 +321,7 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               color: "var(--text-muted)",
-              padding: "4px 10px 8px",
+              padding: "8px 10px 6px",
             }}
           >
             Aktiv
@@ -285,7 +329,7 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
           <div
             style={{
               borderRadius: "10px",
-              padding: "10px 12px",
+              padding: "9px 12px",
               background: "var(--accent-soft)",
               border: "1px solid rgba(212,175,55,0.15)",
             }}
@@ -296,38 +340,78 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
                 fontWeight: 500,
                 color: "var(--accent-primary)",
                 lineHeight: 1.4,
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis",
               }}
             >
               {title ?? "Uten tittel"}
             </p>
           </div>
+
+          {allSessions.filter((s) => s.id !== session.id).length > 0 && (
+            <>
+              <p
+                style={{
+                  fontSize: "10px",
+                  fontWeight: 600,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "var(--text-muted)",
+                  padding: "16px 10px 6px",
+                }}
+              >
+                Tidligere sesjoner
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+                {allSessions
+                  .filter((s) => s.id !== session.id)
+                  .map((s) => (
+                    <Link
+                      key={s.id}
+                      href={`/sessions/${s.id}`}
+                      style={{
+                        display: "block",
+                        borderRadius: "8px",
+                        padding: "8px 12px",
+                        fontSize: "13px",
+                        color: hoveredSessionId === s.id ? "var(--text-primary)" : "var(--text-secondary)",
+                        background: hoveredSessionId === s.id ? "var(--surface-secondary)" : "transparent",
+                        textDecoration: "none",
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                        textOverflow: "ellipsis",
+                        transition: "background 120ms ease, color 120ms ease",
+                      }}
+                      onMouseEnter={() => setHoveredSessionId(s.id)}
+                      onMouseLeave={() => setHoveredSessionId(null)}
+                    >
+                      {s.title ?? "Uten tittel"}
+                    </Link>
+                  ))}
+              </div>
+            </>
+          )}
         </nav>
 
-        <div
-          style={{
-            padding: "14px 20px",
-            borderTop: "1px solid var(--border-subtle)",
-          }}
-        >
-          <Link
-            href="/sessions"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              fontSize: "13px",
-              color: "var(--text-muted)",
-              textDecoration: "none",
-              transition: "color 180ms ease",
-            }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "var(--text-secondary)")}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "var(--text-muted)")}
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-              <path d="M9 2L4 7l5 5" />
-            </svg>
-            Alle briefer
-          </Link>
+        {/* Sign out */}
+        <div style={{ padding: "12px 20px", borderTop: "1px solid var(--border-subtle)" }}>
+          <form action="/api/auth/signout" method="post">
+            <button
+              type="submit"
+              style={{
+                background: "none",
+                border: "none",
+                fontSize: "13px",
+                color: "var(--text-muted)",
+                cursor: "pointer",
+                letterSpacing: "0.01em",
+                padding: 0,
+              }}
+            >
+              Logg ut
+            </button>
+          </form>
         </div>
       </aside>
 
