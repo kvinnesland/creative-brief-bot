@@ -47,3 +47,5 @@
 | 2026-05-20 | Session 5 | app/api/sessions/[id]/export/pdf/ | GET endpoint — renders brief to PDF server-side, returns application/pdf download | CR-004 | Build PASS, tsc 0 errors |
 | 2026-05-20 | Session 5 | app/(app)/sessions/[id]/brief-panel.tsx | Export button already wired to PDF endpoint (was pre-stubbed during scaffold) | CR-004 | Build PASS |
 | 2026-05-20 | Session 5 | tests/unit/brief-pdf.test.tsx | 3 unit tests: empty state, full state, omitted title | CR-004 | 13/13 total unit tests PASS |
+| 2026-05-20 | Session 5 | app/(app)/sessions/session-card.tsx | New "use client" component — SessionCard + StatusBadge extracted from server page | — | Build PASS, 500 resolved |
+| 2026-05-20 | Session 5 | app/(app)/sessions/page.tsx | Removed onMouseEnter/onMouseLeave from server component; now imports SessionCard | — | Build PASS |

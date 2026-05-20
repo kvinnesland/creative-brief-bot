@@ -15,7 +15,13 @@ Opened: YYYY-MM-DD
 
 ## Open Issues
 
-None.
+ISSUE-003
+Status: Open
+Priority: Low
+Area: Infrastructure / Vercel
+Description: Vercel is not connected to GitHub for auto-deploy. Every push requires a manual `vercel --prod` or the production site falls behind.
+Blocker for: Nothing critical — manual deploy works fine
+Opened: 2026-05-20
 
 ## Resolved Issues
 

@@ -78,3 +78,21 @@ ALTERNATIVES CONSIDERED: Keeping light theme with richer tokens; partial dark mo
 RATIONALE: Gold + dark surfaces conveys exclusivity, editorial intelligence, and calm focus. Playfair Display creates immediate typographic differentiation. The emotional target ("This is where serious creative thinking happens") required a full systemic shift, not incremental polish.
 CONSEQUENCES: specs/ui-spec.md is now out of sync with implementation — should be updated before next UI CR. All future components must use CSS custom properties from globals.css, not hardcoded values.
 DECIDED BY: human
+
+DATE: 2026-05-20
+DECISION: Use @react-pdf/renderer (server-side) for PDF export, not headless browser
+CONTEXT: CR-004 required a print-ready PDF export of the creative brief. Two main approaches: server-side React-to-PDF rendering vs. headless Chromium (Puppeteer/Playwright).
+DECISION: @react-pdf/renderer declared as serverExternalPackage in next.config.ts. BriefDocument is a server-only React component rendered via renderToBuffer in the API route. Light editorial PDF design (A4, Times-Roman headings, Helvetica body, gold bullet accents).
+ALTERNATIVES CONSIDERED: Puppeteer/Playwright screenshot-to-PDF (would require headless browser in serverless — incompatible with Vercel); react-to-print (client-side only, browser print dialog).
+RATIONALE: @react-pdf/renderer runs in Node.js with no browser dependency, makes a clean PDF (not a screenshot), and works inside Vercel serverless functions. Produces deterministic output suitable for client delivery.
+CONSEQUENCES: PDF design is decoupled from the app's dark theme — intentionally uses a clean light layout (client-facing document vs. tool UI). Font options limited to PDF-safe fonts (Helvetica, Times-Roman, Courier) unless custom fonts are registered.
+DECIDED BY: Claude
+
+DATE: 2026-05-20
+DECISION: Extract SessionCard to a "use client" component
+CONTEXT: Visual redesign (Session 4) added onMouseEnter/onMouseLeave hover handlers directly to SessionCard inside sessions/page.tsx (a server component). React 19 throws a runtime error when a server component contains event handler props — this caused /sessions to 500.
+DECISION: Extract SessionCard and StatusBadge to app/(app)/sessions/session-card.tsx with "use client" directive. page.tsx remains a server component responsible only for data fetching and layout.
+ALTERNATIVES CONSIDERED: Add "use client" to page.tsx (would lose server-side data fetching and redirect); use CSS :hover instead of JS handlers (viable, but requires refactor to className-based styling).
+RATIONALE: Cleanest split — server component handles auth + data, client component handles interactivity. Aligns with Next.js App Router best practice.
+CONSEQUENCES: Pattern to follow for any future interactive list items or cards. page.tsx is now purely a server component.
+DECIDED BY: Claude
