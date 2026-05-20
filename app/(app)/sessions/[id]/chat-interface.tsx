@@ -222,6 +222,7 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
             }}
             placeholder="Describe your project…"
             rows={1}
+            autoFocus
             disabled={isStreaming}
             style={{
               flex: 1,
@@ -306,10 +307,10 @@ function MessageBubble({ role, text }: { role: "user" | "assistant"; text: strin
                 color: "var(--text-primary)",
               }
             : {
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.07)",
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.09)",
                 backdropFilter: "blur(12px)",
-                color: "var(--text-secondary)",
+                color: "var(--text-primary)",
               }),
         }}
       >
