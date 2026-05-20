@@ -15,7 +15,25 @@ Opened: YYYY-MM-DD
 
 ## Open Issues
 
-None.
+ISSUE-004
+Status: Open
+Priority: Medium
+Area: lib/agents/conversation-agent.ts — review phase
+Description: The review-and-confirm phase activates when gaps = 0, but the extractor confidence threshold (0.6) may allow sections to fill with low-quality data, triggering review prematurely. No minimum quality gate before entering review mode.
+Blocker for: Nothing critical — product still usable
+Opened: 2026-05-20
+
+ISSUE-005
+Status: Open
+Priority: Low
+Area: lib/hooks/use-speech-recognition.ts + chat-interface.tsx
+Description: Voice mode TTS and STT not tested on iOS Safari. SpeechRecognition uses webkit prefix (handled in hook), but speechSynthesis behaviour on iOS may differ. Android Chrome primer fix deployed but unverified in production.
+Blocker for: Nothing critical — voice is progressive enhancement
+Opened: 2026-05-20
+
+## Resolved Issues (Session 8)
+
+(No new issues resolved this session — all work was features/improvements.)
 
 ## Resolved Issues (Session 7)
 

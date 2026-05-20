@@ -3,13 +3,11 @@
 > Updated at the end of every session. Read by Claude at startup.
 
 ## Current Phase
-FEATURE-COMPLETE MVP — All core product loops implemented and deployed.
-The app has a functional AI conversation pipeline, live brief panel, message hydration,
-session titling, markdown + PDF export, shareable brief links, and a full premium dark-theme redesign.
+VOICE + AI QUALITY — Core product loops complete. This session added voice conversation, tightened AI behaviour (single question, review phase, off-topic guard), fixed the brief extractor language bug, and updated the PDF export to cover all 11 sections.
 
 ## Current Objectives
-1. Decide on next feature direction (voice input, team sharing, onboarding flow)
-2. Create CR for next feature once direction is decided
+1. Validate voice conversation on iOS Safari and Android Chrome in the wild
+2. Decide on next product direction (onboarding flow, team sharing, analytics)
 
 ## Current Branch
 master
@@ -25,64 +23,44 @@ None.
 - CR-005: Domain-Restricted Signup — Status: Done
 - CR-006: Mobile-Responsive Layout — Status: Done
 
-## Recently Modified Systems (Session 3+)
+## Recently Modified Systems (Session 8 — 2026-05-20)
 
-### Message hydration fix (commit 0bbf786)
-- app/(app)/sessions/[id]/page.tsx — passes initialMessages to SessionShell
-- lib/repositories/message-repo.ts — findMessagesBySession used for hydration
+### AI conversation improvements (multiple commits)
+- lib/agents/conversation-agent.ts — ABSOLUTT REGEL: one question per turn; off-topic guard; review-and-confirm phase when all sections filled; full-sentence formatting in review
+- lib/agents/brief-extractor.ts — Extracted field values must be written in Norwegian (bokmål)
 
-### Auto-generate session title (commit 1be31ec)
-- app/api/chat/route.ts — generates title from first user message turn
+### PDF export fix (commit 7df75b7)
+- lib/pdf/brief-pdf.tsx — All 11 sections included in correct order with Norwegian labels; removed visual_direction; "Ikke definert ennå" placeholder
+- tests/unit/brief-pdf.test.tsx — Updated fixture to cover all new fields
 
-### Export brief as markdown (commit 0bc2f80)
-- app/api/sessions/[id]/export/route.ts — GET endpoint, streams .md file
-- app/(app)/sessions/[id]/brief-panel.tsx — Export button wired up
+### Auto-focus textarea (commit dd65617)
+- app/(app)/sessions/[id]/chat-interface.tsx — textarea.focus() when isStreaming → false
 
-### URL context injection + shareable brief links (commit 74bc034, CR-003)
-- app/api/sessions/[id]/share/route.ts — POST generates share token, returns URL
-- app/briefs/[token]/page.tsx — public read-only brief page (no auth)
-- lib/repositories/session-repo.ts — findSessionByShareToken
+### Voice input (commit 0a55eb7)
+- lib/hooks/use-speech-recognition.ts — Web Speech API hook (nb-NO), exposes state/toggle/start/onEnd
+- app/(app)/sessions/[id]/chat-interface.tsx — Stemme toggle in header, voice mode cycle, TTS via speechSynthesis, status bar (Lytter/Tenker/Venter), Android Chrome primer
 
-### DB error handling (commit 06c01b2)
-- app/briefs/[token]/page.tsx — notFound() on DB errors instead of 500
+### Voice bug fixes (commits 13ae302, 41d6d69)
+- TTS switched from onFinish param to useEffect watching isStreaming (more reliable)
+- Android Chrome: silent SpeechSynthesisUtterance primed on button click to unlock API
 
-### Visual redesign (commit 18b6646)
-- app/globals.css — full dark token system (#0D0D0D, #D4AF37 gold, layered surfaces)
-- app/layout.tsx — Playfair Display + Inter via next/font/google
-- app/(auth)/login/page.tsx — cinematic dark auth card
-- app/(auth)/signup/page.tsx — cinematic dark auth card
-- app/(app)/sessions/page.tsx — dark editorial sessions list
-- app/(app)/sessions/new-brief-button.tsx — gold pill button
-- app/(app)/sessions/[id]/session-shell.tsx — dark 3-column shell (300/flex/420, 20px gaps)
-- app/(app)/sessions/[id]/chat-interface.tsx — glass assistant bubbles, gold user bubbles
-- app/(app)/sessions/[id]/brief-panel.tsx — thin gold progress bar, uppercase labels
-- app/briefs/[token]/page.tsx — premium public brief layout
+### Cleanup (commit 00a3ff2)
+- Removed standalone MicButton and "Mikrofon for tale" hint from input field
 
 ## Validation Status
-- `npm run build` — PASS (2026-05-20, Session 6, CR-006)
-- `npx tsc --noEmit` — 0 errors (2026-05-20)
-- `npx vitest run tests/unit` — 27/27 PASS (2026-05-20)
-- Deployed to Vercel: creative-brief-bot.vercel.app — LIVE (commit faf8a3b)
+- `npx tsc --noEmit` — 0 errors (2026-05-20, Session 8)
+- `npx vitest run tests/unit` — all PASS (2026-05-20, Session 8)
+- Deployed to Vercel: creative-brief-bot.vercel.app — auto-deploy via GitHub (master)
 
-## Known Limitations (acceptable for MVP)
-- No rate limiting (noted for future Redis implementation)
-- No voice input (planned future CR)
+## Known Limitations
+- No rate limiting
 - No multi-user / team sharing
-- Vercel not wired to GitHub for auto-deploy — requires manual `vercel --prod`
-
-## Recently Modified Systems (Session 5)
-
-### PDF export (CR-004, commits e00de3e + 0dd25da)
-- lib/pdf/brief-pdf.tsx — BriefDocument @react-pdf/renderer component
-- app/api/sessions/[id]/export/pdf/route.ts — GET endpoint, server-side render to PDF
-- app/(app)/sessions/[id]/brief-panel.tsx — Export button (was pre-stubbed, now live)
-- tests/unit/brief-pdf.test.tsx — 3 unit tests
-
-### Sessions 500 bugfix (commit faf8a3b)
-- app/(app)/sessions/session-card.tsx — new "use client" component (extracted from page.tsx)
-- app/(app)/sessions/page.tsx — removed event handlers from server component
+- Voice TTS quality depends on OS/browser — best on iOS/macOS, variable on Windows/Android
+- Voice mode not tested on iOS Safari (SpeechRecognition requires webkit prefix, handled in hook)
+- Web Speech API unavailable in Firefox — Stemme button hidden automatically
 
 ## Next Recommended Actions
-1. Decide on next feature: voice input, team sharing, or onboarding flow
-2. Wire Vercel to GitHub for auto-deploy (eliminates manual deploy step)
-3. Create CR for chosen next feature
+1. Test voice mode on iOS Safari and Android Chrome — confirm full cycle works
+2. Consider onboarding flow (first-time user guidance)
+3. Consider team/sharing features (invite colleague to review brief)
+4. Add rate limiting if traffic grows

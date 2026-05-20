@@ -60,3 +60,23 @@
 | 2026-05-20 | Session 6 | app/(app)/sessions/[id]/chat-interface.tsx | backHref prop → back chevron in header; SendButton 44×44 for touch | CR-006 | Build PASS |
 | 2026-05-20 | Session 6 | app/(app)/sessions/page.tsx | Nav padding 32px→20px for mobile | CR-006 | Build PASS |
 | 2026-05-20 | Session 6 | tests/unit/brief-progress.test.ts | 6 unit tests for calcProgress | CR-006 | 27/27 total PASS |
+| 2026-05-20 | Session 7 | lib/utils/brief-progress.ts | calcCompletionPct — section-fill count (11 slots) replacing confidence avg for progress UI | — | Tests PASS |
+| 2026-05-20 | Session 7 | lib/types/entities.ts | Added background, problem_statement, communication_goal, insight, reasons_to_believe to BriefState + BriefStatePatch; updated BriefStateField union | — | tsc 0 errors |
+| 2026-05-20 | Session 7 | lib/agents/brief-extractor.ts | Full rewrite — 11-field Zod schema, confidence calibration (single sentence max 0.65), open_questions to patch, Norwegian language rule | — | tsc PASS |
+| 2026-05-20 | Session 7 | lib/agents/gap-finder.ts | REQUIRED_FIELDS updated to all 11 fields | — | Tests PASS |
+| 2026-05-20 | Session 7 | lib/agents/conversation-agent.ts | Complete Norwegian rewrite — 8-section framework, strategic probing, single-question rule, EMPTY_BRIEF_STATE fallback | — | tsc PASS |
+| 2026-05-20 | Session 7 | lib/agents/contradiction-checker.ts | filledFields updated to include all new entity fields | — | tsc PASS |
+| 2026-05-20 | Session 7 | lib/config/ai.ts | Both models upgraded gpt-4o-mini → gpt-4o | — | Build PASS |
+| 2026-05-20 | Session 7 | app/api/chat/route.ts | runAnalysisPipeline wrapped in try-catch with fallback to prevent chat hang | — | Build PASS |
+| 2026-05-20 | Session 7 | app/(app)/sessions/[id]/page.tsx | key={session.id} on SessionShell to force remount on session navigation | — | Build PASS |
+| 2026-05-20 | Session 7 | app/(app)/sessions/[id]/session-shell.tsx | Sidebar with session list + "+ Ny brief"; calcCompletionPct for progress | — | Build PASS |
+| 2026-05-20 | Session 7 | app/(app)/sessions/page.tsx | Converted to server-side redirect (sessions list retired as standalone page) | — | Build PASS |
+| 2026-05-20 | Session 7 | app/(app)/sessions/[id]/brief-panel.tsx | 9-section SECTIONS array in framework order; calcCompletionPct; "Del med kollega" | — | Build PASS |
+| 2026-05-20 | Session 7 | db/migrations/004_extended_brief_fields.sql | ADD COLUMN background, problem_statement, communication_goal, insight, reasons_to_believe | — | Applied |
+| 2026-05-20 | Session 8 | lib/agents/brief-extractor.ts | Added Norwegian (bokmål) language rule — prevents English paraphrasing of Norwegian input | — | tsc PASS |
+| 2026-05-20 | Session 8 | lib/agents/conversation-agent.ts | ABSOLUTT REGEL one question per turn; off-topic guard; review-and-confirm phase (gaps=0); full-sentence formatting in narrative sections | — | tsc PASS |
+| 2026-05-20 | Session 8 | lib/pdf/brief-pdf.tsx | All 11 sections, Norwegian labels, correct framework order, removed visual_direction, Norwegian placeholder | — | 3/3 PDF tests PASS |
+| 2026-05-20 | Session 8 | tests/unit/brief-pdf.test.tsx | Updated fixture to cover all 11 fields with Norwegian content | — | Tests PASS |
+| 2026-05-20 | Session 8 | app/(app)/sessions/[id]/chat-interface.tsx | Auto-focus textarea on stream end; voice mode (Stemme toggle, TTS cycle, status bar, Android primer); MicButton removed | — | tsc 0 errors |
+| 2026-05-20 | Session 8 | lib/hooks/use-speech-recognition.ts | useSpeechRecognition hook — Web Speech API, nb-NO, start/toggle/onEnd, browser-compat guard | — | tsc 0 errors |
+| 2026-05-20 | Session 8 | app/globals.css | @keyframes pulse for voice mode animation | — | Build PASS |
