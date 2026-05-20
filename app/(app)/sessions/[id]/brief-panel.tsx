@@ -55,12 +55,12 @@ export function BriefPanel({ sessionId, briefState }: Props) {
     if (!canExport || exporting) return;
     setExporting(true);
     try {
-      const res = await fetch(`/api/sessions/${sessionId}/export`);
+      const res = await fetch(`/api/sessions/${sessionId}/export/pdf`);
       if (!res.ok) throw new Error("Export failed");
       const blob = await res.blob();
       const disposition = res.headers.get("Content-Disposition") ?? "";
       const match = disposition.match(/filename="([^"]+)"/);
-      const filename = match?.[1] ?? "creative-brief.md";
+      const filename = match?.[1] ?? "creative-brief.pdf";
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;

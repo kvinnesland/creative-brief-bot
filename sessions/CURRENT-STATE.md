@@ -22,6 +22,7 @@ None.
 - CR-001: Project Scaffold — Status: Done
 - CR-002: Core Conversation Pipeline — Status: Done
 - CR-003: Shareable Brief Links + Export — Status: Done
+- CR-004: PDF Export — Status: Done
 
 ## Recently Modified Systems (Session 3+)
 
@@ -57,15 +58,14 @@ None.
 - app/briefs/[token]/page.tsx — premium public brief layout
 
 ## Validation Status
-- `npm run build` — PASS (2026-05-19, commit 18b6646)
-- `npx tsc --noEmit` — 0 errors (2026-05-19)
-- `npx vitest run tests/unit/gap-finder.test.ts` — 5/5 PASS
-- Deployed to Vercel: creative-brief-bot.vercel.app
+- `npm run build` — PASS (2026-05-20, CR-004)
+- `npx tsc --noEmit` — 0 errors (2026-05-20)
+- `npx vitest run tests/unit` — 13/13 PASS (2026-05-20)
+- Deployed to Vercel: creative-brief-bot.vercel.app (pending redeploy for CR-004)
 
 ## Known Limitations (acceptable for MVP)
 - No rate limiting (noted for future Redis implementation)
 - No voice input (planned future CR)
-- No PDF export (markdown only)
 - No multi-user / team sharing
 
 ## Next Recommended Actions

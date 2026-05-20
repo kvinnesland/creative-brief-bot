@@ -17,6 +17,8 @@ FEATURE-COMPLETE MVP — Full conversation pipeline, brief management, export, s
 | `app/api/sessions/` | Session CRUD API routes | Done CR-001 |
 | `app/api/sessions/[id]/brief-state/` | GET brief state for client polling | Done CR-002 |
 | `app/api/sessions/[id]/export/` | GET markdown export | Done CR-003 |
+| `app/api/sessions/[id]/export/pdf/` | GET PDF export — @react-pdf/renderer server-side | Done CR-004 |
+| `lib/pdf/brief-pdf.tsx` | BriefDocument component — light editorial PDF layout | Done CR-004 |
 | `app/api/sessions/[id]/share/` | POST generate share token + URL | Done CR-003 |
 | `app/api/chat/` | POST streaming chat endpoint | Done CR-002 |
 | `app/api/auth/signout/` | Sign-out route | Done CR-001 |
@@ -77,4 +79,4 @@ Dark premium editorial theme:
 - All inline styles reference CSS custom properties (not raw hex values) for theme consistency
 
 ## Last Structural Change
-2026-05-19 — Full visual redesign: dark premium editorial aesthetic, Playfair Display typography, gold accent system.
+2026-05-20 — CR-004: PDF export. New lib/pdf/ module (BriefDocument) + GET /api/sessions/[id]/export/pdf route. @react-pdf/renderer declared as serverExternalPackage in next.config.ts.

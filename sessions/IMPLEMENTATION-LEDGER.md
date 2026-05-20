@@ -43,3 +43,7 @@
 | 2026-05-19 | Session 4 | app/(app)/sessions/[id]/chat-interface.tsx | Glass assistant bubbles, gold-tinted user bubbles, auto-expanding textarea, arrow send button | — | Build PASS |
 | 2026-05-19 | Session 4 | app/(app)/sessions/[id]/brief-panel.tsx | 2px thin gold progress bar with glow, uppercase section labels, 1px confidence bars | — | Build PASS |
 | 2026-05-19 | Session 4 | app/briefs/[token]/page.tsx | Premium public brief layout: 40px Playfair title, gold dashes, dark card with dividers | — | Build PASS |
+| 2026-05-20 | Session 5 | lib/pdf/brief-pdf.tsx | BriefDocument @react-pdf/renderer component — light editorial layout, Times-Roman headings, gold accents | CR-004 | 3/3 unit tests PASS |
+| 2026-05-20 | Session 5 | app/api/sessions/[id]/export/pdf/ | GET endpoint — renders brief to PDF server-side, returns application/pdf download | CR-004 | Build PASS, tsc 0 errors |
+| 2026-05-20 | Session 5 | app/(app)/sessions/[id]/brief-panel.tsx | Export button already wired to PDF endpoint (was pre-stubbed during scaffold) | CR-004 | Build PASS |
+| 2026-05-20 | Session 5 | tests/unit/brief-pdf.test.tsx | 3 unit tests: empty state, full state, omitted title | CR-004 | 13/13 total unit tests PASS |
