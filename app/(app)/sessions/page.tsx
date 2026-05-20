@@ -19,7 +19,7 @@ export default async function SessionsPage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 32px",
+          padding: "0 20px",
           height: "60px",
           borderBottom: "1px solid var(--border-subtle)",
           backgroundColor: "var(--surface-primary)",

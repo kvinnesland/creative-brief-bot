@@ -1,9 +1,12 @@
 "use client";
+// CR-006: Mobile-responsive shell. Desktop: 3-column grid. Mobile (<640px): single-column + bottom tab bar.
 
 import { useState, useCallback } from "react";
 import { ChatInterface } from "./chat-interface";
 import { BriefPanel } from "./brief-panel";
 import type { BriefState, BriefSession } from "@/lib/types/entities";
+import { useWindowWidth } from "@/lib/hooks/use-window-width";
+import { calcProgress } from "@/lib/utils/brief-progress";
 import Link from "next/link";
 
 interface UIMessage {
@@ -21,6 +24,9 @@ interface Props {
 export function SessionShell({ session, initialBriefState, initialMessages }: Props) {
   const [briefState, setBriefState] = useState<BriefState | null>(initialBriefState);
   const [title, setTitle] = useState<string | null>(session.title);
+  const [activeTab, setActiveTab] = useState<"chat" | "brief">("chat");
+  const width = useWindowWidth();
+  const isMobile = width < 640;
 
   const refreshBriefState = useCallback(async () => {
     try {
@@ -38,6 +44,186 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
     }
   }, [session.id]);
 
+  const progress = calcProgress(briefState);
+
+  if (isMobile) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100dvh",
+          backgroundColor: "var(--bg-primary)",
+          overflow: "hidden",
+        }}
+      >
+        {/* Content area — both panels always mounted so brief polling continues uninterrupted */}
+        <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: activeTab === "chat" ? "flex" : "none",
+              flexDirection: "column",
+              background: "var(--surface-primary)",
+            }}
+          >
+            <ChatInterface
+              sessionId={session.id}
+              onBriefStateUpdate={refreshBriefState}
+              initialTitle={title}
+              initialMessages={initialMessages}
+              backHref="/sessions"
+            />
+          </div>
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: activeTab === "brief" ? "flex" : "none",
+              flexDirection: "column",
+              background: "var(--surface-primary)",
+              overflowY: "auto",
+            }}
+          >
+            <BriefPanel sessionId={session.id} briefState={briefState} />
+          </div>
+        </div>
+
+        {/* Bottom tab bar */}
+        <nav
+          style={{
+            display: "flex",
+            borderTop: "1px solid var(--border-subtle)",
+            backgroundColor: "var(--surface-primary)",
+            paddingBottom: "env(safe-area-inset-bottom, 0px)",
+            flexShrink: 0,
+          }}
+        >
+          {/* Chat tab */}
+          <button
+            onClick={() => setActiveTab("chat")}
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "56px",
+              border: "none",
+              background: "none",
+              cursor: "pointer",
+              gap: "4px",
+            }}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 18 18"
+              fill="none"
+              stroke={activeTab === "chat" ? "var(--accent-primary)" : "var(--text-muted)"}
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 3h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6l-3 3V4a1 1 0 0 1 1-1z" />
+            </svg>
+            <span
+              style={{
+                fontSize: "10px",
+                fontWeight: 600,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: activeTab === "chat" ? "var(--accent-primary)" : "var(--text-muted)",
+              }}
+            >
+              Chat
+            </span>
+          </button>
+
+          {/* Divider */}
+          <div style={{ width: "1px", background: "var(--border-subtle)", margin: "10px 0" }} />
+
+          {/* Brief tab with progress indicator */}
+          <button
+            onClick={() => setActiveTab("brief")}
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "56px",
+              border: "none",
+              background: "none",
+              cursor: "pointer",
+              gap: "5px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke={activeTab === "brief" ? "var(--accent-primary)" : "var(--text-muted)"}
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="2" y="2" width="12" height="12" rx="2" />
+                <path d="M5 6h6M5 9h4" />
+              </svg>
+              <span
+                style={{
+                  fontSize: "10px",
+                  fontWeight: 600,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: activeTab === "brief" ? "var(--accent-primary)" : "var(--text-muted)",
+                }}
+              >
+                Brief
+              </span>
+              <span
+                style={{
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  color: progress > 0 ? "var(--accent-primary)" : "var(--text-muted)",
+                  minWidth: "28px",
+                }}
+              >
+                {progress}%
+              </span>
+            </div>
+            {/* Thin gold progress bar */}
+            <div
+              style={{
+                width: "64px",
+                height: "2px",
+                borderRadius: "1px",
+                background: "var(--border-subtle)",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  height: "100%",
+                  width: `${progress}%`,
+                  background: "var(--accent-primary)",
+                  borderRadius: "1px",
+                  transition: "width 600ms ease",
+                  boxShadow: progress > 0 ? "0 0 6px rgba(212,175,55,0.4)" : "none",
+                }}
+              />
+            </div>
+          </button>
+        </nav>
+      </div>
+    );
+  }
+
+  // ── Desktop layout (unchanged) ──
   return (
     <div
       style={{
@@ -61,17 +247,13 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
           flexDirection: "column",
         }}
       >
-        {/* Sidebar header */}
         <div
           style={{
             padding: "20px 20px 16px",
             borderBottom: "1px solid var(--border-subtle)",
           }}
         >
-          <Link
-            href="/sessions"
-            style={{ textDecoration: "none" }}
-          >
+          <Link href="/sessions" style={{ textDecoration: "none" }}>
             <span
               style={{
                 fontFamily: "var(--font-serif)",
@@ -87,7 +269,6 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
           </Link>
         </div>
 
-        {/* Active brief item */}
         <nav style={{ flex: 1, overflowY: "auto", padding: "12px" }}>
           <p
             style={{
@@ -122,7 +303,6 @@ export function SessionShell({ session, initialBriefState, initialMessages }: Pr
           </div>
         </nav>
 
-        {/* Sidebar footer */}
         <div
           style={{
             padding: "14px 20px",

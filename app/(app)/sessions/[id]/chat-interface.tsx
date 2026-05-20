@@ -3,6 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useState, useRef, useEffect, useMemo } from "react";
+import Link from "next/link";
 
 interface UIMessage {
   id: string;
@@ -15,9 +16,10 @@ interface Props {
   onBriefStateUpdate: () => void;
   initialTitle: string | null;
   initialMessages: UIMessage[];
+  backHref?: string;
 }
 
-export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, initialMessages }: Props) {
+export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, initialMessages, backHref }: Props) {
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -59,11 +61,36 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
       {/* Header */}
       <div
         style={{
-          padding: "20px 24px 16px",
+          padding: "16px 20px 14px",
           borderBottom: "1px solid var(--border-subtle)",
           flexShrink: 0,
+          display: "flex",
+          alignItems: "flex-start",
+          gap: "12px",
         }}
       >
+        {backHref && (
+          <Link
+            href={backHref}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "32px",
+              height: "32px",
+              flexShrink: 0,
+              marginTop: "2px",
+              color: "var(--text-muted)",
+              textDecoration: "none",
+            }}
+            aria-label="All briefs"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10 3L5 8l5 5" />
+            </svg>
+          </Link>
+        )}
+        <div style={{ flex: 1 }}>
         <h1
           style={{
             fontFamily: "var(--font-serif)",
@@ -87,6 +114,7 @@ export function ChatInterface({ sessionId, onBriefStateUpdate, initialTitle, ini
         >
           {isStreaming ? "Thinking…" : "In progress"}
         </p>
+        </div>
       </div>
 
       {/* Message thread */}
@@ -301,8 +329,8 @@ function SendButton({ onClick, disabled }: { onClick: () => void; disabled: bool
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        width: "34px",
-        height: "34px",
+        width: "44px",
+        height: "44px",
         borderRadius: "10px",
         border: "none",
         flexShrink: 0,
