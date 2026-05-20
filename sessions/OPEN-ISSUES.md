@@ -15,15 +15,20 @@ Opened: YYYY-MM-DD
 
 ## Open Issues
 
+None.
+
+## Resolved Issues (Session 7)
+
 ISSUE-003
-Status: Open
+Status: Resolved
 Priority: Low
 Area: Infrastructure / Vercel
-Description: Vercel is not connected to GitHub for auto-deploy. Every push requires a manual `vercel --prod` or the production site falls behind.
-Blocker for: Nothing critical — manual deploy works fine
+Description: Vercel was not connected to GitHub for auto-deploy.
+Blocker for: Nothing critical
 Opened: 2026-05-20
+Resolved: 2026-05-20 — Connected GitHub repo via Vercel Settings → Git. Production environment confirmed tracking master branch.
 
-## Resolved Issues
+## Resolved Issues (Sessions 1–6)
 
 ISSUE-001
 Status: Resolved
